@@ -1,0 +1,23 @@
+.THIS .slds-combobox, .THIS .slds-input {
+    cursor: pointer;
+}
+
+.THIS div[role="listbox"] {
+    position: relative;
+    top: -3px;
+    user-select: none;
+}
+@media screen and (max-width: 370px) {
+    .THIS .slds-button_neutral,
+    .THIS .slds-button--neutral,
+    .THIS .slds-button_brand,
+    .THIS .slds-button--brand {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    .THIS .slds-combobox_container{
+        width: 200px;
+        min-width: 200px;
+
+    }
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Resource_Order_Rule__c</fullName>
+    <defaultValue>&apos;Name ASC&apos;</defaultValue>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Resource Order Rule</label>
+    <required>false</required>
+    <type>TextArea</type>
+</CustomField>

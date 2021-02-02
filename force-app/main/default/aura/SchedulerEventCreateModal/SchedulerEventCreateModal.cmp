@@ -1,0 +1,52 @@
+<aura:component description="SchedulerEventCreateModal" controller="SchedulerController" implements="force:appHostable,flexipage:availableForAllPageTypes" access="global">
+
+	<aura:attribute name="eventCreateModalVisible" type="Boolean" access="public"/>
+	<aura:attribute name="schedulerMapping" type="Object" access="public"/>
+	<aura:attribute name="eventEditFields" type="Object" access="public"/>
+	<aura:attribute name="selectedEventId" type="Id" access="public"/>
+	<aura:attribute name="newEventParentResource" type="Object" access="public"/>
+	<aura:attribute name="data" type="Object" access="public"/>
+	<aura:attribute name="updateData" type="Object" access="public"/>
+	<aura:attribute name="fieldsVisible" type="Boolean" access="public" default="true"/>
+
+	<aura:if isTrue="{!v.eventCreateModalVisible}">
+		<section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+			<div class="slds-modal__container">
+				<header class="slds-modal__header slds-modal__header_empty">
+					<button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.closeEventCreateModal}">
+						<lightning:icon iconName="utility:close" variant="inverse"/>
+						<span class="slds-assistive-text">Close</span>
+					</button>
+				</header>
+				<lightning:recordEditForm objectApiName="{!v.schedulerMapping.thn__Event_API_Name__c}" aura:id="newEventForm" onsubmit="{!c.onRecordSubmit}" recordId="{!v.selectedEventId}" onsuccess="{!c.onFormSubmitSuccess}" onerror="{!c.onFormSubmitError}">
+				<div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+					<lightning:messages/>
+					<aura:iteration items="{!v.schedulerMapping.thn__Event_Edit_Mode_Fields__c}" var="field">
+							<div>
+								<aura:if isTrue="{!field == v.schedulerMapping.thn__Event_Parent_Resource_API_Field__c}">
+									<lightning:inputField fieldName="{!field}" value="{!v.newEventParentResource}"/>
+
+									<aura:set attribute="else">
+										<lightning:inputField class="{!field}" fieldName="{!field}"/>
+									</aura:set>
+								</aura:if>
+							</div>
+					</aura:iteration>
+
+				</div>
+					<footer class="slds-modal__footer">
+						<button class="slds-button slds-button_neutral" onclick="{!c.closeEventCreateModal}">Cancel</button>
+						<lightning:button variant="brand" label="Save" type="submit"/>
+					</footer>
+<!--				<footer class="slds-modal__footer">-->
+<!--					<button class="slds-button slds-button_neutral" onclick="{!c.closeEventCreateModal}">Cancel</button>-->
+<!--					<button class="slds-button slds-button_brand" onclick="{!c.saveNewEvent}">Save</button>-->
+<!--				</footer>-->
+				</lightning:recordEditForm>
+
+			</div>
+		</section>
+		<div class="slds-backdrop slds-backdrop_open"></div>
+	</aura:if>
+
+</aura:component>
