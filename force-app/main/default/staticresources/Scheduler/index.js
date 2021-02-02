@@ -9,6 +9,8 @@
 		document.querySelectorAll('.b-popup').forEach(el => {el.remove()});
 		const actions = {
 			'init': (payload) => {
+				console.log(payload);
+
 				document.addEventListener('click', (e) => {
 					if (e.target.tagName === 'BUTTON') {
 						sendMessage({

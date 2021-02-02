@@ -4,11 +4,11 @@
     <protected>false</protected>
     <values>
         <field>Event_API_Name__c</field>
-        <value xsi:type="xsd:string">thn__SP_Event__c</value>
+        <value xsi:type="xsd:string">SP_Event__c</value>
     </values>
     <values>
         <field>Event_Color_API_Field__c</field>
-        <value xsi:type="xsd:string">thn__Color__c</value>
+        <value xsi:type="xsd:string">Color__c</value>
     </values>
     <values>
         <field>Event_Color__c</field>
@@ -16,15 +16,15 @@
     </values>
     <values>
         <field>Event_Edit_Mode_Fields__c</field>
-        <value xsi:type="xsd:string">Name</value>
+        <value xsi:type="xsd:string">Name, Start_Date__c, End_Date__c, Parent_Resource__c</value>
     </values>
     <values>
         <field>Event_End_Date_API_Field__c</field>
-        <value xsi:type="xsd:string">thn__End_Date__c</value>
+        <value xsi:type="xsd:string">End_Date__c</value>
     </values>
     <values>
         <field>Event_Icon_API_Field__c</field>
-        <value xsi:type="xsd:string">thn__Icon__c</value>
+        <value xsi:type="xsd:string">Icon__c</value>
     </values>
     <values>
         <field>Event_Icon__c</field>
@@ -40,23 +40,31 @@
     </values>
     <values>
         <field>Event_Parent_Resource_API_Field__c</field>
-        <value xsi:type="xsd:string">thn__Parent_Resource__c</value>
+        <value xsi:type="xsd:string">Parent_Resource__c</value>
     </values>
     <values>
         <field>Event_Start_Date_API_Field__c</field>
-        <value xsi:type="xsd:string">thn__Start_Date__c</value>
+        <value xsi:type="xsd:string">Start_Date__c</value>
     </values>
     <values>
         <field>Event_Status_API_Field__c</field>
-        <value xsi:type="xsd:string">thn__Status__c</value>
+        <value xsi:type="xsd:string">Status__c</value>
+    </values>
+    <values>
+        <field>Event_Tooltip_Fields__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Hotel_API_Name__c</field>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Resource_API_Name__c</field>
-        <value xsi:type="xsd:string">thn__SP_Resource__c</value>
+        <value xsi:type="xsd:string">SP_Resource__c</value>
     </values>
     <values>
         <field>Resource_Bookable_API_Field__c</field>
-        <value xsi:type="xsd:string">thn__Bookable__c</value>
+        <value xsi:type="xsd:string">Bookable__c</value>
     </values>
     <values>
         <field>Resource_Color__c</field>
@@ -67,8 +75,12 @@
         <value xsi:type="xsd:string">Name</value>
     </values>
     <values>
+        <field>Resource_Hotel_API_Name__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
         <field>Resource_Icon_API_Field__c</field>
-        <value xsi:type="xsd:string">thn__Icon__c</value>
+        <value xsi:type="xsd:string">Icon__c</value>
     </values>
     <values>
         <field>Resource_Icon__c</field>
@@ -79,11 +91,35 @@
         <value xsi:type="xsd:string">Name</value>
     </values>
     <values>
+        <field>Resource_Opening_Hours_API_Name__c</field>
+        <value xsi:type="xsd:string">SP_Resource_Opening_Hours__c</value>
+    </values>
+    <values>
+        <field>Resource_Opening_Hours_Days_API_Field__c</field>
+        <value xsi:type="xsd:string">Days__c</value>
+    </values>
+    <values>
+        <field>Resource_Opening_Hours_End_Time__c</field>
+        <value xsi:type="xsd:string">End_Time__c</value>
+    </values>
+    <values>
+        <field>Resource_Opening_Hours_Resource__c</field>
+        <value xsi:type="xsd:string">Resource__c</value>
+    </values>
+    <values>
+        <field>Resource_Opening_Hours_Start_Time__c</field>
+        <value xsi:type="xsd:string">Start_Time__c</value>
+    </values>
+    <values>
         <field>Resource_Order_Rule__c</field>
         <value xsi:type="xsd:string">Name ASC</value>
     </values>
     <values>
         <field>Resource_Parent_Resource_API_Field__c</field>
-        <value xsi:type="xsd:string">thn__Parent_Resource__c</value>
+        <value xsi:type="xsd:string">Parent_Resource__c</value>
+    </values>
+    <values>
+        <field>Resource_Type_API_Name__c</field>
+        <value xsi:type="xsd:string">Type__c</value>
     </values>
 </CustomMetadata>

@@ -38,7 +38,7 @@ public with sharing class SchedulerController {
 		];
 
 		List<Map<String, String>> types = new List<Map<String, String>>();
-
+        
 		for (PicklistEntry picklistEntry : Schema.getGlobalDescribe().get(schedulerFields.Resource_API_Name__c).getDescribe().fields.getMap().get(schedulerFields.Resource_Type_API_Name__c).getDescribe().getPicklistValues()) {
 			types.add(new Map<String, String> {
 				'label' => picklistEntry.getLabel(),
@@ -47,9 +47,12 @@ public with sharing class SchedulerController {
 		}
 
 		Map<String, Object> result = new Map<String, Object> {
-			'hotels' => Database.query('SELECT Id, Name FROM ' + schedulerFields.Hotel_API_Name__c + ' ORDER BY Name ASC'),
 			'types' => types
 		};
+            
+        if (schedulerFields.Hotel_API_Name__c != null) {
+            result.put('hotels', Database.query('SELECT Id, Name FROM ' + schedulerFields.Hotel_API_Name__c + ' ORDER BY Name ASC'));
+        }
 
 		return JSON.serialize(result);
 	}

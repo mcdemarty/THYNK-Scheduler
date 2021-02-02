@@ -8,8 +8,8 @@
         event.preventDefault();
         let newEvent = JSON.parse(JSON.stringify(event.getParam("fields")));
 
-        newEvent[component.get('v.schedulerMapping').thn__Event_Start_Date_API_Field__c] = newEvent[component.get('v.schedulerMapping').thn__Event_Start_Date_API_Field__c].replace('T', ' ');
-        newEvent[component.get('v.schedulerMapping').thn__Event_End_Date_API_Field__c] = newEvent[component.get('v.schedulerMapping').thn__Event_End_Date_API_Field__c].replace('T', ' ');
+        newEvent[component.get('v.schedulerMapping').Event_Start_Date_API_Field__c] = newEvent[component.get('v.schedulerMapping').Event_Start_Date_API_Field__c].replace('T', ' ');
+        newEvent[component.get('v.schedulerMapping').Event_End_Date_API_Field__c] = newEvent[component.get('v.schedulerMapping').Event_End_Date_API_Field__c].replace('T', ' ');
         helper.saveNewEvent(component, newEvent);
     },
 

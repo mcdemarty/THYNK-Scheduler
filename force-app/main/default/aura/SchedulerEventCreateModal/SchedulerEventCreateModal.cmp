@@ -18,12 +18,12 @@
 						<span class="slds-assistive-text">Close</span>
 					</button>
 				</header>
-				<lightning:recordEditForm objectApiName="{!v.schedulerMapping.thn__Event_API_Name__c}" aura:id="newEventForm" onsubmit="{!c.onRecordSubmit}" recordId="{!v.selectedEventId}" onsuccess="{!c.onFormSubmitSuccess}" onerror="{!c.onFormSubmitError}">
+				<lightning:recordEditForm objectApiName="{!v.schedulerMapping.Event_API_Name__c}" aura:id="newEventForm" onsubmit="{!c.onRecordSubmit}" recordId="{!v.selectedEventId}" onsuccess="{!c.onFormSubmitSuccess}" onerror="{!c.onFormSubmitError}">
 				<div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
 					<lightning:messages/>
-					<aura:iteration items="{!v.schedulerMapping.thn__Event_Edit_Mode_Fields__c}" var="field">
+					<aura:iteration items="{!v.schedulerMapping.Event_Edit_Mode_Fields__c}" var="field">
 							<div>
-								<aura:if isTrue="{!field == v.schedulerMapping.thn__Event_Parent_Resource_API_Field__c}">
+								<aura:if isTrue="{!field == v.schedulerMapping.Event_Parent_Resource_API_Field__c}">
 									<lightning:inputField fieldName="{!field}" value="{!v.newEventParentResource}"/>
 
 									<aura:set attribute="else">

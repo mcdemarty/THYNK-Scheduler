@@ -128,8 +128,8 @@ public without sharing class SchedulerControllerTest {
 
 		System.assertEquals('', SchedulerController.updateEvent(new Map<String, Object> {
 			'Id' => event.Id,
-			'thn__Start_Date__c' => Datetime.now().addDays(-1),
-			'thn__End_Date__c' => Datetime.now().addDays(1)
+			'Start_Date__c' => Datetime.now().addDays(-1),
+			'End_Date__c' => Datetime.now().addDays(1)
 		}, [
 			SELECT Id
 			FROM Scheduler_Fields__mdt

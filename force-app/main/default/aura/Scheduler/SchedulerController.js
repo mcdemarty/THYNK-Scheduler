@@ -22,13 +22,15 @@
 						const result = JSON.parse(response.getReturnValue());
 
 						const hotels = [];
-
-						result.hotels.map(hotel => {
-							hotels.push({
-								value: hotel.Id,
-								label: hotel.Name
-							})
-						});
+                        
+                        if (result.hotels) {
+                            result.hotels.map(hotel => {
+                                hotels.push({
+                                    value: hotel.Id,
+                                    label: hotel.Name
+                                })
+							});  
+                        }
 
 						component.set('v.hotels', hotels);
 						component.set('v.types', result.types);
@@ -51,7 +53,7 @@
 			} else if (payload.name === 'addEventContextMenuClick') {
 				const resourceRecord = payload.data.resourceRecord;
 
-				if (!resourceRecord[component.get('v.schedulerMapping').thn__Resource_Bookable_API_Field__c]) {
+				if (!resourceRecord[component.get('v.schedulerMapping').Resource_Bookable_API_Field__c]) {
 					const toastEvent = $A.get('e.force:showToast');
 					toastEvent.setParams({
 						title: 'Error!',
@@ -70,7 +72,7 @@
 				component.set('v.selectedEventId', payload.data.eventId);
 				component.find('eventCreateModal').set('v.eventCreateModalVisible', true);
 			} else if (payload.name === 'schedulerListenerCellDblClick') {
-				if (!payload.data[component.get('v.schedulerMapping').thn__Resource_Bookable_API_Field__c]) {
+				if (!payload.data[component.get('v.schedulerMapping').Resource_Bookable_API_Field__c]) {
 					return;
 				}
 
@@ -78,13 +80,13 @@
 				component.find('eventCreateModal').set('v.eventCreateModalVisible', true);
 			} else if (payload.name === 'schedulerListenerEventDrop') {
 				// const resourceId = payload.data.targetResourceRecord.data.id;
-				let resourceId = payload.data.eventRecords[0].data[component.get('v.schedulerMapping').thn__Event_Parent_Resource_API_Field__c];
+				let resourceId = payload.data.eventRecords[0].data[component.get('v.schedulerMapping').Event_Parent_Resource_API_Field__c];
 
 				if (resourceId){
 					if (resourceId !== payload.data.targetResourceRecord.data.id){
 						resourceId = payload.data.targetResourceRecord.data.id;
 					}
-					if (!component.get('v.data').resources[resourceId][component.get('v.schedulerMapping').thn__Resource_Bookable_API_Field__c]) {
+					if (!component.get('v.data').resources[resourceId][component.get('v.schedulerMapping').Resource_Bookable_API_Field__c]) {
 						const toastEvent = $A.get('e.force:showToast');
 						toastEvent.setParams({
 							title: 'Error!',
@@ -110,10 +112,10 @@
 				startDate.setHours(startDate.getHours() - new Date().getTimezoneOffset() / 60);
 				endDate.setHours(endDate.getHours() - new Date().getTimezoneOffset() / 60);
 
-				newEvent[component.get('v.schedulerMapping').thn__Event_Start_Date_API_Field__c] = startDate.toJSON().replace('T', ' ');
-				newEvent[component.get('v.schedulerMapping').thn__Event_End_Date_API_Field__c] = endDate.toJSON().replace('T', ' ');
+				newEvent[component.get('v.schedulerMapping').Event_Start_Date_API_Field__c] = startDate.toJSON().replace('T', ' ');
+				newEvent[component.get('v.schedulerMapping').Event_End_Date_API_Field__c] = endDate.toJSON().replace('T', ' ');
 				if (resourceId){
-					newEvent[component.get('v.schedulerMapping').thn__Event_Parent_Resource_API_Field__c] = resourceId;
+					newEvent[component.get('v.schedulerMapping').Event_Parent_Resource_API_Field__c] = resourceId;
 				}
 				console.log(newEvent);
 				action.setParams({
@@ -160,8 +162,8 @@
 				startDate.setHours(startDate.getHours() - new Date().getTimezoneOffset() / 60);
 				endDate.setHours(endDate.getHours() - new Date().getTimezoneOffset() / 60);
 
-				newEvent[component.get('v.schedulerMapping').thn__Event_Start_Date_API_Field__c] = startDate.toJSON().replace('T', ' ');
-				newEvent[component.get('v.schedulerMapping').thn__Event_End_Date_API_Field__c] = endDate.toJSON().replace('T', ' ');
+				newEvent[component.get('v.schedulerMapping').Event_Start_Date_API_Field__c] = startDate.toJSON().replace('T', ' ');
+				newEvent[component.get('v.schedulerMapping').Event_End_Date_API_Field__c] = endDate.toJSON().replace('T', ' ');
 				console.log(newEvent);
 
 				action.setParams({
@@ -234,7 +236,7 @@
 			component.get('v.resourceDisplayColumns').map(column => {
 				resourceFields.push({
 					dataSource: column.field,
-					name: column.text
+					name: 'Name'
 				})
 			});
 

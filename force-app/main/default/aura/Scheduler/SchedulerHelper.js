@@ -67,9 +67,9 @@
 		Object.keys(result.mapping).map(mappingKey => {
 			let array = null;
 
-			if (mappingKey.toLowerCase().startsWith('thn__event')) {
+			if (mappingKey.toLowerCase().startsWith('event')) {
 				array = result.events;
-			} else if (mappingKey.toLowerCase().startsWith('thn__resource')) {
+			} else if (mappingKey.toLowerCase().startsWith('resource')) {
 				array = result.resources;
 			}
 
@@ -99,8 +99,8 @@
 		const mapping = result.mapping;
 
 		Object.keys(mapping).map(key => {
-			if (!key.startsWith('thn__')) {
-				mapping['thn__' + key] = mapping[key];
+			if (!key.startsWith('')) {
+				mapping['' + key] = mapping[key];
 			}
 		});
 
@@ -109,10 +109,10 @@
 		const currentViewType = component.get('v.viewType');
 		const events = [];
 
-		if (!mapping.thn__Resource_Order_Rule__c) {
-			mapping.thn__Resource_Order_Rule__c = 'Name ASC';
+		if (!mapping.Resource_Order_Rule__c) {
+			mapping.Resource_Order_Rule__c = 'Name ASC';
 		} else {
-			mapping.thn__Resource_Order_Rule__c = mapping.thn__Resource_Order_Rule__c.replace(/\s+/, ' ');
+			mapping.Resource_Order_Rule__c = mapping.Resource_Order_Rule__c.replace(/\s+/, ' ');
 		}
 
 		if (currentViewType === 'week') {
@@ -128,11 +128,11 @@
 		Object.keys(result.events).map(eventKey => {
 			const eventItem = result.events[eventKey];
 
-			eventItem.name = eventItem[mapping.thn__Event_Name_API_Field__c];
-			eventItem.iconCls = eventItem[mapping.thn__Event_Icon_API_Field__c] || mapping.thn__Event_Icon__c;
+			eventItem.name = eventItem[mapping.Event_Name_API_Field__c];
+			eventItem.iconCls = eventItem[mapping.Event_Icon_API_Field__c] || mapping.Event_Icon__c;
 
-			eventItem.startDate = new Date(eventItem[mapping.thn__Event_Start_Date_API_Field__c]);
-			eventItem.endDate = new Date(eventItem[mapping.thn__Event_End_Date_API_Field__c]);
+			eventItem.startDate = new Date(eventItem[mapping.Event_Start_Date_API_Field__c]);
+			eventItem.endDate = new Date(eventItem[mapping.Event_End_Date_API_Field__c]);
 
 			eventItem.startDate.setHours(eventItem.startDate.getHours() + result.timezoneOffset + new Date().getTimezoneOffset() / 60);
 			eventItem.endDate.setHours(eventItem.endDate.getHours() + result.timezoneOffset + new Date().getTimezoneOffset() / 60);
@@ -143,15 +143,15 @@
 			eventItem.draggable = true;
 			eventItem.resizable = true;
 
-			eventItem.eventColor = eventItem[mapping.thn__Event_Color_API_Field__c] || mapping.thn__Event_Color__c;
+			eventItem.eventColor = eventItem[mapping.Event_Color_API_Field__c] || mapping.Event_Color__c;
 
-			if (resources[result.events[eventKey][mapping.thn__Event_Parent_Resource_API_Field__c]]) {
-				if (!resources[result.events[eventKey][mapping.thn__Event_Parent_Resource_API_Field__c]].events) {
-					resources[result.events[eventKey][mapping.thn__Event_Parent_Resource_API_Field__c]].events = {};
+			if (resources[result.events[eventKey][mapping.Event_Parent_Resource_API_Field__c]]) {
+				if (!resources[result.events[eventKey][mapping.Event_Parent_Resource_API_Field__c]].events) {
+					resources[result.events[eventKey][mapping.Event_Parent_Resource_API_Field__c]].events = {};
 				}
 
-				resources[result.events[eventKey][mapping.thn__Event_Parent_Resource_API_Field__c]].events[eventKey] = result.events[eventKey];
-				eventItem.resourceId = resources[result.events[eventKey][mapping.thn__Event_Parent_Resource_API_Field__c]].Id;
+				resources[result.events[eventKey][mapping.Event_Parent_Resource_API_Field__c]].events[eventKey] = result.events[eventKey];
+				eventItem.resourceId = resources[result.events[eventKey][mapping.Event_Parent_Resource_API_Field__c]].Id;
 
 				events.push(eventItem);
 			} else {
@@ -180,21 +180,21 @@
 		Object.keys(resources).map(resourceKey => {
 			const resource = result.resources[resourceKey];
 
-			resource.Name = resource[mapping.thn__Resource_Name_API_Field__c];
-			resource.Icon = resource[mapping.thn__Resource_Icon_API_Field__c] || mapping.thn__Resource_Icon__c;
+			resource.Name = resource[mapping.Resource_Name_API_Field__c];
+			resource.Icon = resource[mapping.Resource_Icon_API_Field__c] || mapping.Resource_Icon__c;
 			resource.iconCls = resource.Icon;
 			resource.id = resource.Id;
 
-			if (resource[mapping.thn__Resource_Parent_Resource_API_Field__c]) {
-				let parentId = resource[mapping.thn__Resource_Parent_Resource_API_Field__c];
+			if (resource[mapping.Resource_Parent_Resource_API_Field__c]) {
+				let parentId = resource[mapping.Resource_Parent_Resource_API_Field__c];
 
 				while (!resources[parentId].isVisible) {
-					if (!resources[parentId][mapping.thn__Resource_Parent_Resource_API_Field__c] && !resources[parentId].isVisible) {
-						delete resource[mapping.thn__Resource_Parent_Resource_API_Field__c];
+					if (!resources[parentId][mapping.Resource_Parent_Resource_API_Field__c] && !resources[parentId].isVisible) {
+						delete resource[mapping.Resource_Parent_Resource_API_Field__c];
 						return;
 					}
 
-					parentId = resources[parentId][mapping.thn__Resource_Parent_Resource_API_Field__c];
+					parentId = resources[parentId][mapping.Resource_Parent_Resource_API_Field__c];
 				}
 
 				if (!resources[parentId].children) {
@@ -214,7 +214,7 @@
 				delete resource.children;
 			}
 
-			if (resource[mapping.thn__Resource_Parent_Resource_API_Field__c] || !resource.isVisible) {
+			if (resource[mapping.Resource_Parent_Resource_API_Field__c] || !resource.isVisible) {
 				delete resources[resource.Id];
 			}
 		});
@@ -231,8 +231,8 @@
 					item.children = Object.values(item.children);
 
 					item.children.sort((a, b) => {
-						const field = mapping.thn__Resource_Order_Rule__c.split(' ')[0];
-						const direction = mapping.thn__Resource_Order_Rule__c.split(' ')[1];
+						const field = mapping.Resource_Order_Rule__c.split(' ')[0];
+						const direction = mapping.Resource_Order_Rule__c.split(' ')[1];
 
 						let aValue = a[field] || {};
 						let bValue = b[field] || {};
@@ -313,8 +313,8 @@
 		resources = Object.values(resources);
 
 		resources.sort((a, b) => {
-			const field = mapping.thn__Resource_Order_Rule__c.split(' ')[0];
-			const direction = mapping.thn__Resource_Order_Rule__c.split(' ')[1];
+			const field = mapping.Resource_Order_Rule__c.split(' ')[0];
+			const direction = mapping.Resource_Order_Rule__c.split(' ')[1];
 
 			let aValue = a[field];
 			let bValue = b[field];
@@ -348,9 +348,9 @@
 			event.resourceId = resources[0].id
 		});
 
-		mapping.thn__Event_Edit_Mode_Fields__c = mapping.thn__Event_Edit_Mode_Fields__c.split(',');
-		for (let i = 0; i < mapping.thn__Event_Edit_Mode_Fields__c.length; i++) {
-			mapping.thn__Event_Edit_Mode_Fields__c[i] = mapping.thn__Event_Edit_Mode_Fields__c[i].trim();
+		mapping.Event_Edit_Mode_Fields__c = mapping.Event_Edit_Mode_Fields__c.split(',');
+		for (let i = 0; i < mapping.Event_Edit_Mode_Fields__c.length; i++) {
+			mapping.Event_Edit_Mode_Fields__c[i] = mapping.Event_Edit_Mode_Fields__c[i].trim();
 		}
 
 		result.resourceDisplayColumns.map(column => {
