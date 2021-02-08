@@ -1,8 +1,0 @@
-<design:component>
-	<design:attribute name="fieldMappingMetadataId" label="Field Mapping Metadata Id"/>
-	<design:attribute name="onePageMode" label="One Page Mode"/>
-	<design:attribute name="defaultHeight" label="Default Height"/>
-	<design:attribute name="rowHeight" label="Row Height"/>
-	<design:attribute name="customResourceFilter" label="Custom Resource Filter"/>
-	<design:attribute name="customEventFilter" label="Custom Event Filter"/>
-</design:component>

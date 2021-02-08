@@ -1,0 +1,35 @@
+<template>
+	<div class="slds-page-header slds-page-header_record-home slds-is-relative">
+		<lightning-spinner if:true={showSpinner} variant="brand"></lightning-spinner>
+		<div if:true={errorMessage} class="error-message-container">
+			{errorMessage}
+		</div>
+		<div class="slds-page-header__row">
+			<div class="slds-page-header__col-title slds-p-around_small slds-grid_align-spread slds-grid_vertical-align-center slds-grid">
+				<div class="slds-grid slds-grid_vertical-align-center">
+					<lightning-button-group>
+						<lightning-button label="+" onclick={expandAllClickHandler}></lightning-button>
+						<lightning-button label="-" onclick={collapseAllClickHandler}></lightning-button>
+					</lightning-button-group>
+					<lightning-button label="New Event" class="slds-m-left_small" onclick={createEventClickHandler}></lightning-button>
+				</div>
+				<div class="slds-grid slds-grid_vertical-align-center">
+					<lightning-input type="date" label="Start Date" value={startDate} onchange={startDateInputChangeHandler}></lightning-input>
+					<div class="slds-p-horizontal_small time-range-header-separator"> - </div>
+					<lightning-input type="date" label="End Date" value={endDate} onchange={endDateInputChangeHandler}></lightning-input>
+					<lightning-combobox label="View Preset" options={viewPresetPicklistOptions} class="slds-m-left_medium" value={viewPresetPicklistValue} onchange={viewPresetPicklistChangeHandler}></lightning-combobox>
+				</div>
+			</div>
+		</div>
+		<div class="slds-page-header__col-details">
+			<div class="scheduler-container"></div>
+		</div>
+	</div>
+
+	<template if:true={schedulerData}>
+		<c-scheduler-event-create-modal class="scheduler-event-create-modal" event-object-name={schedulerData.eventObjectName}
+										fields={schedulerData.eventEditFields} oneventcreate={eventCreateHandler}
+										event-id={selectedEventId} field-mapping-metadata-id={schedulerFieldsMetadataId}
+										event-parent-resource-field-name={schedulerData.eventParentResourceFieldAPIName}></c-scheduler-event-create-modal>
+	</template>
+</template>

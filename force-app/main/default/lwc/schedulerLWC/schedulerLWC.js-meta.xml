@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    
+    <apiVersion>48.0</apiVersion>
+    
+    <description>Scheduler Lwc</description>
+    
+    <isExposed>true</isExposed>
+    
+    <masterLabel>Scheduler Lwc</masterLabel>
+    
+    <targets>
+        
+        <target>lightning__RecordPage</target>
+        
+        <target>lightning__AppPage</target>
+        
+        <target>lightning__HomePage</target>
+        
+    </targets>
+    
+    <targetConfigs>
+        
+        <targetConfig targets="lightning__RecordPage,lightning__AppPage,lightning__HomePage">
+            
+            <property name="schedulerFieldsMetadataId" type="String" label="Field Metadata Id"/>
+            
+            <property name="eventCustomFilter" type="String" label="Event Custom Filter"/>
+            
+            <property name="resourceCustomFilter" type="String" label="Resource Custom Filter"/>
+            
+            <property name="resourceOrderRule" type="String" label="Resource Order Rule"/>
+            
+            <property name="componentHeight" type="String" label="Component Height" default="300px"/>
+            
+        </targetConfig>
+        
+    </targetConfigs>
+    
+</LightningComponentBundle>
