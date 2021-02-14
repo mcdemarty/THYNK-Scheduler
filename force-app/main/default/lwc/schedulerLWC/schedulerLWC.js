@@ -66,6 +66,8 @@ export default class SchedulerLwc extends LightningElement {
 	// Init actions
 
 	initScheduler() {
+		this.showSpinner = true;
+
 		const schedulerPreset = this.getCurrentPreset();
 
 		this.startDate = new Date(schedulerPreset.startDate.getFullYear(), schedulerPreset.startDate.getMonth(), schedulerPreset.startDate.getDate(), 0, -new Date().getTimezoneOffset()).toISOString();
@@ -144,6 +146,7 @@ export default class SchedulerLwc extends LightningElement {
 				schedulerOptions = Object.assign(schedulerOptions, schedulerPreset);
 
 				this.template.querySelector('.scheduler-container').innerHTML = '';
+				this.template.querySelector('.b-float-root').innerHTML = '';
 
 				this.scheduler = new bryntum.scheduler.Scheduler(schedulerOptions);
 

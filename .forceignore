@@ -10,3 +10,10 @@ package.xml
 
 # LWC Jest
 **/__tests__/**
+
+ProductServiceCampaignItem.My_ProductServiceCampaignItems
+ProductServiceCampaignItem.All_ProductServiceCampaignItems
+ShiftTemplate.My_ShiftTemplates
+ShiftTemplate.All_ShiftTemplates
+ProductServiceCampaignItem.My_RecentProductServiceCampaignItems
+ShiftTemplate.My_RecentShiftTemplates

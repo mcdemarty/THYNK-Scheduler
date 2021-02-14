@@ -28,7 +28,7 @@
     </values>
     <values>
         <field>Event_Icon__c</field>
-        <value xsi:type="xsd:string">fas fa-calendar-day</value>
+        <value xsi:type="xsd:string">b-fa b-fa-calendar-day</value>
     </values>
     <values>
         <field>Event_Name_API_Field__c</field>
@@ -84,7 +84,7 @@
     </values>
     <values>
         <field>Resource_Icon__c</field>
-        <value xsi:type="xsd:string">fas fa-home</value>
+        <value xsi:type="xsd:string">b-fa b-fa-home</value>
     </values>
     <values>
         <field>Resource_Name_API_Field__c</field>

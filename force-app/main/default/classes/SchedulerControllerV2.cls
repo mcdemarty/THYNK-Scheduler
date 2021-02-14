@@ -2,7 +2,7 @@ public with sharing class SchedulerControllerV2 {
 
 	private static Scheduler_Fields__mdt schedulerFieldMapping;
 
-	@AuraEnabled(Cacheable=true)
+	@AuraEnabled(Cacheable=false)
 	public static SchedulerData getSchedulerData(String fieldMappingMetadataId, Datetime startDate, Datetime endDate, String eventCustomFilter, String resourceCustomFilter, String resourceOrderRule) {
 		if (!FeatureManagement.checkPermission(getPackagedName('Scheduler')) && !Test.isRunningTest()) {
 			throw new SchedulerException('No permissions to access the Scheduler');
