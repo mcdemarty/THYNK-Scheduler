@@ -46,6 +46,10 @@ export default class SchedulerLwc extends LightningElement {
 	connectedCallback() {
 		this.showSpinner = true;
 
+		document.addEventListener('mouseup', () => {
+			this.saveColumnsWidth();
+		})
+
 		Promise.all([
 			loadScript(this, SCHEDULER + '/scheduler.lwc.module.js'),
 			loadStyle(this, SCHEDULER + "/scheduler.stockholm.css")
@@ -101,6 +105,13 @@ export default class SchedulerLwc extends LightningElement {
 					data: this.mergeEventRecords(extensibleResult.events)
 				});
 
+				const columns = extensibleResult.resourceColumns;
+				const columnsWidth = this.getSavedColumnsWidth();
+
+				for (let i = 0; i < columnsWidth.length; i++) {
+					columns[i].width = columnsWidth[i];
+				}
+
 				extensibleResult.resourceColumns[0].type = 'tree';
 
 				let schedulerOptions = {
@@ -130,7 +141,7 @@ export default class SchedulerLwc extends LightningElement {
 						}
 					},
 
-					columns: extensibleResult.resourceColumns,
+					columns: columns,
 
 					barMargin: parseInt(this.eventMargin) || 0,
 
@@ -181,6 +192,27 @@ export default class SchedulerLwc extends LightningElement {
 
 		this.collapsedResources = state.collapsedResources;
 		this.currentViewPreset = state.preset;
+	}
+
+	saveColumnsWidth() {
+		if (!this.scheduler) {
+			return;
+		}
+
+		const widths = [];
+		const columns = Array.from(this.template.querySelectorAll('.b-grid-header')).slice(0, -1);
+
+		for (let i = 0; i < columns.length; i++) {
+			widths.push(columns[i].getBoundingClientRect().width);
+		}
+
+		window.localStorage.setItem(window.location + 'schedulerColumnsWidth', JSON.stringify(widths));
+
+		console.log(widths);
+	}
+
+	getSavedColumnsWidth() {
+		return JSON.parse(window.localStorage.getItem(window.location + 'schedulerColumnsWidth')) || [];
 	}
 
 	// Preset functions
@@ -351,6 +383,9 @@ export default class SchedulerLwc extends LightningElement {
 			.then(() => {
 				this.isManualCollapseExpand = false;
 			});
+
+		console.log(this.scheduler);
+		console.log(this.scheduler.columns);
 	}
 
 	collapseAllClickHandler() {

@@ -362,6 +362,8 @@ public with sharing class SchedulerControllerV2 {
 		public String field;
 		@AuraEnabled
 		public Boolean sortable = false;
+		@AuraEnabled
+		public Boolean draggable = false;
 	}
 
 	public class SchedulerFieldMappingException extends Exception {}
