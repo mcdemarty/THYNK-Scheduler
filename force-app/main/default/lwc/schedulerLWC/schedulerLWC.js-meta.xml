@@ -34,6 +34,8 @@
             
             <property name="componentHeight" type="String" label="Component Height" default="300px"/>
             
+            <property name="eventMargin" type="String" label="Event Margin" default="16px"/>
+            
         </targetConfig>
         
     </targetConfigs>

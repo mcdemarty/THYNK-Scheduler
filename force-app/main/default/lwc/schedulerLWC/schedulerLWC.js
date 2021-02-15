@@ -13,6 +13,7 @@ export default class SchedulerLwc extends LightningElement {
 	@api resourceCustomFilter;
 	@api resourceOrderRule;
 	@api componentHeight;
+	@api eventMargin;
 
 	VIEW_PRESET = {
 		DAY: 1,
@@ -130,6 +131,8 @@ export default class SchedulerLwc extends LightningElement {
 					},
 
 					columns: extensibleResult.resourceColumns,
+
+					barMargin: parseInt(this.eventMargin) || 0,
 
 					resourceStore: resourceStore,
 					eventStore: eventStore,

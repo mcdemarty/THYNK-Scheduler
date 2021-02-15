@@ -17,3 +17,5 @@ ShiftTemplate.My_ShiftTemplates
 ShiftTemplate.All_ShiftTemplates
 ProductServiceCampaignItem.My_RecentProductServiceCampaignItems
 ShiftTemplate.My_RecentShiftTemplates
+
+force-app/main/default/profiles
