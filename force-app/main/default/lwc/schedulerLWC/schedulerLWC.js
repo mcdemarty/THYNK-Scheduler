@@ -58,7 +58,7 @@ export default class SchedulerLwc extends LightningElement {
 			loadStyle(this, SCHEDULER + "/scheduler.stockholm.css")
 		])
 			.then(() => {
-				bryntum.scheduler.init(this.template);
+				bryntum.schedulerpro.init(this.template);
 
 				this.loadSchedulerState();
 
@@ -109,12 +109,12 @@ export default class SchedulerLwc extends LightningElement {
 
 				this.removeEmptyChildrenArrays(extensibleResult.resources);
 
-				const resourceStore = new bryntum.scheduler.ResourceStore({
+				const resourceStore = new bryntum.schedulerpro.ResourceStore({
 					tree: true,
 					data: this.collapseResourcesFromState(this.mergeResourceRecords(extensibleResult.resources))
 				});
 
-				const eventStore = new bryntum.scheduler.EventStore({
+				const eventStore = new bryntum.schedulerpro.EventStore({
 					data: this.mergeEventRecords(extensibleResult.events)
 				});
 
@@ -140,6 +140,7 @@ export default class SchedulerLwc extends LightningElement {
 						eventDragCreate: false,
 						contextMenu: false,
 						enableEventAnimations: false,
+						dependencies: false,
 
 						eventTooltip: {
 							template: (event) => {
@@ -175,7 +176,7 @@ export default class SchedulerLwc extends LightningElement {
 				this.template.querySelector('.scheduler-container').innerHTML = '';
 				this.template.querySelector('.b-float-root').innerHTML = '';
 
-				this.scheduler = new bryntum.scheduler.Scheduler(schedulerOptions);
+				this.scheduler = new bryntum.schedulerpro.SchedulerPro(schedulerOptions);
 
 				this.scheduler.relatedComponent = this;
 
