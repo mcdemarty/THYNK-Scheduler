@@ -33,6 +33,9 @@ export default class SchedulerLwc extends LightningElement {
 	customStartDate;
 	customEndDate;
 
+	savedStartDate;
+	savedEndDate;
+
 	collapsedResources;
 
 	isManualCollapseExpand = false;
@@ -75,11 +78,21 @@ export default class SchedulerLwc extends LightningElement {
 
 		const schedulerPreset = this.getCurrentPreset();
 
+		if (this.savedStartDate && this.savedEndDate) {
+			schedulerPreset.startDate = this.savedStartDate;
+			schedulerPreset.endDate = this.savedEndDate;
+
+			this.savedStartDate = null;
+			this.savedEndDate = null;
+		}
+
 		this.startDate = new Date(schedulerPreset.startDate.getFullYear(), schedulerPreset.startDate.getMonth(), schedulerPreset.startDate.getDate(), 0, -new Date().getTimezoneOffset()).toISOString();
 		this.endDate = new Date(schedulerPreset.endDate.getFullYear(), schedulerPreset.endDate.getMonth(), schedulerPreset.endDate.getDate(), 0, -new Date().getTimezoneOffset()).toISOString();
 
 		this.customStartDate = schedulerPreset.startDate;
 		this.customEndDate = schedulerPreset.endDate;
+
+		this.saveSchedulerState();
 
 		getSchedulerData({
 			fieldMappingMetadataId: this.schedulerFieldsMetadataId,
@@ -180,6 +193,8 @@ export default class SchedulerLwc extends LightningElement {
 
 		state.preset = this.currentViewPreset;
 		state.collapsedResources = this.collapsedResources;
+		state.startDate = new Date(this.customStartDate).toISOString();
+		state.endDate = new Date(this.customEndDate).toISOString();
 
 		window.localStorage.setItem(window.location + 'schedulerState', JSON.stringify(state));
 	}
@@ -192,6 +207,11 @@ export default class SchedulerLwc extends LightningElement {
 
 		this.collapsedResources = state.collapsedResources;
 		this.currentViewPreset = state.preset;
+
+		if (state.startDate && state.endDate) {
+			this.savedStartDate = new Date(state.startDate);
+			this.savedEndDate = new Date(state.endDate);
+		}
 	}
 
 	saveColumnsWidth() {
@@ -207,8 +227,6 @@ export default class SchedulerLwc extends LightningElement {
 		}
 
 		window.localStorage.setItem(window.location + 'schedulerColumnsWidth', JSON.stringify(widths));
-
-		console.log(widths);
 	}
 
 	getSavedColumnsWidth() {
@@ -383,9 +401,6 @@ export default class SchedulerLwc extends LightningElement {
 			.then(() => {
 				this.isManualCollapseExpand = false;
 			});
-
-		console.log(this.scheduler);
-		console.log(this.scheduler.columns);
 	}
 
 	collapseAllClickHandler() {
@@ -400,7 +415,6 @@ export default class SchedulerLwc extends LightningElement {
 	viewPresetPicklistChangeHandler(event) {
 		this.currentViewPreset = parseInt(event.target.value);
 
-		this.saveSchedulerState();
 		this.initScheduler();
 	}
 
