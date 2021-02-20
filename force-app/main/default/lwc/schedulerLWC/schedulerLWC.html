@@ -14,10 +14,16 @@
 					<lightning-button label="New Event" class="slds-m-left_small" onclick={createEventClickHandler}></lightning-button>
 				</div>
 				<div class="slds-grid slds-grid_vertical-align-center">
+					<div onclick={moveToPreviousPeriodClickHandler}>
+						<lightning-icon icon-name="utility:chevronleft" size="small" class="period-controller-button slds-m-right_small"></lightning-icon>
+					</div>
 					<lightning-input type="date" label="Start Date" value={startDate} onchange={startDateInputChangeHandler}></lightning-input>
 					<div class="slds-p-horizontal_small time-range-header-separator"> - </div>
 					<lightning-input type="date" label="End Date" value={endDate} onchange={endDateInputChangeHandler}></lightning-input>
-					<lightning-combobox label="View Preset" options={viewPresetPicklistOptions} class="slds-m-left_medium" value={viewPresetPicklistValue} onchange={viewPresetPicklistChangeHandler}></lightning-combobox>
+					<div onclick={moveToNextPeriodClickHandler}>
+						<lightning-icon icon-name="utility:chevronright" size="small" class="period-controller-button slds-m-left_small"></lightning-icon>
+					</div>
+					<lightning-combobox label="View Preset" options={viewPresetPicklistOptions} class="slds-m-left_large" value={viewPresetPicklistValue} onchange={viewPresetPicklistChangeHandler}></lightning-combobox>
 				</div>
 			</div>
 		</div>

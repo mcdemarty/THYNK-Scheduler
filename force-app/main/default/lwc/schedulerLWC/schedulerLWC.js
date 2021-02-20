@@ -444,6 +444,52 @@ export default class SchedulerLwc extends LightningElement {
 		this.initScheduler();
 	}
 
+	moveToNextPeriodClickHandler() {
+		this.savedStartDate = this.customStartDate;
+		this.savedEndDate = this.customEndDate;
+
+		if (this.currentViewPreset === this.VIEW_PRESET.DAY) {
+			this.savedStartDate.setDate(this.savedStartDate.getDate() + 1);
+			this.savedEndDate.setDate(this.savedEndDate.getDate() + 1);
+		} else if (this.currentViewPreset === this.VIEW_PRESET.WEEK) {
+			this.savedStartDate.setDate(this.savedStartDate.getDate() + 7);
+			this.savedEndDate.setDate(this.savedEndDate.getDate() + 7);
+		} else if (this.currentViewPreset === this.VIEW_PRESET.MONTH) {
+			this.savedStartDate.setMonth(this.savedStartDate.getMonth() + 1);
+			this.savedEndDate.setMonth(this.savedEndDate.getMonth() + 1);
+		} else if (this.currentViewPreset === this.VIEW_PRESET.CUSTOM) {
+			const difference = Math.trunc((this.savedEndDate - this.savedStartDate) / 1000 / 60 / 60 / 24);
+
+			this.savedStartDate.setDate(this.savedStartDate.getDate() + difference);
+			this.savedEndDate.setDate(this.savedEndDate.getDate() + difference);
+		}
+
+		this.initScheduler();
+	}
+
+	moveToPreviousPeriodClickHandler() {
+		this.savedStartDate = this.customStartDate;
+		this.savedEndDate = this.customEndDate;
+
+		if (this.currentViewPreset === this.VIEW_PRESET.DAY) {
+			this.savedStartDate.setDate(this.savedStartDate.getDate() - 1);
+			this.savedEndDate.setDate(this.savedEndDate.getDate() - 1);
+		} else if (this.currentViewPreset === this.VIEW_PRESET.WEEK) {
+			this.savedStartDate.setDate(this.savedStartDate.getDate() - 7);
+			this.savedEndDate.setDate(this.savedEndDate.getDate() - 7);
+		} else if (this.currentViewPreset === this.VIEW_PRESET.MONTH) {
+			this.savedStartDate.setMonth(this.savedStartDate.getMonth() - 1);
+			this.savedEndDate.setMonth(this.savedEndDate.getMonth() - 1);
+		} else if (this.currentViewPreset === this.VIEW_PRESET.CUSTOM) {
+			const difference = Math.trunc((this.savedEndDate - this.savedStartDate) / 1000 / 60 / 60 / 24);
+
+			this.savedStartDate.setDate(this.savedStartDate.getDate() - difference);
+			this.savedEndDate.setDate(this.savedEndDate.getDate() - difference);
+		}
+
+		this.initScheduler();
+	}
+
 	// Scheduler Listeners
 
 	eventDropResizeHandler(event) {
