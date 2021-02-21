@@ -38,6 +38,8 @@
             
             <property name="eventLayoutType" type="String" label="Event Layout Type" default="stack" datasource="stack,pack,overlap"/>
             
+            <property name="enableColumnFiltering" type="Boolean" label="Event Column Filtering"/>
+            
         </targetConfig>
         
     </targetConfigs>

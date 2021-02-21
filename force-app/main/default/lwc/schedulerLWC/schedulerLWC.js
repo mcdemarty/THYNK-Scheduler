@@ -15,6 +15,7 @@ export default class SchedulerLwc extends LightningElement {
 	@api componentHeight;
 	@api eventMargin;
 	@api eventLayoutType;
+	@api enableColumnFiltering;
 
 	VIEW_PRESET = {
 		DAY: 1,
@@ -157,6 +158,7 @@ export default class SchedulerLwc extends LightningElement {
 						enableEventAnimations: false,
 						dependencies: false,
 						resourceTimeRanges: true,
+						filterBar: this.enableColumnFiltering || false,
 
 						eventTooltip: {
 							template: (event) => {

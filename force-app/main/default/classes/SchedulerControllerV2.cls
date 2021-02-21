@@ -249,10 +249,6 @@ public with sharing class SchedulerControllerV2 {
 			schedulerFields.Resource_Maintenance_Resource_API_Field__c
 		};
 
-		System.debug(startTime);
-		System.debug(endTime);
-		System.debug(resources);
-
 		String query = 'SELECT ' + String.join(new List<String>(fieldsToRetrieve), ',') + ' FROM ' + schedulerFields.Resource_Maintenance_API_Name__c + ' WHERE ' + schedulerFields.Resource_Maintenance_Resource_API_Field__c + ' IN :resources AND ';
 
 		String startEndWhereClause = String.format('(({0} >= :startTime AND {0} <= :endTime) OR ({1} >= :startTime AND {1} <= :endTime) OR ({0} <= :startTime AND {1} >= :endTime))', new List<String> {
@@ -263,9 +259,6 @@ public with sharing class SchedulerControllerV2 {
 		query += startEndWhereClause;
 
 		List<SObject> queriedRanges = Database.query(query);
-
-		System.debug(query);
-		System.debug(queriedRanges);
 
 		List<SchedulerTimeRange> result = new List<SchedulerTimeRange>();
 
