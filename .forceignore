@@ -17,5 +17,7 @@ ShiftTemplate.My_ShiftTemplates
 ShiftTemplate.All_ShiftTemplates
 ProductServiceCampaignItem.My_RecentProductServiceCampaignItems
 ShiftTemplate.My_RecentShiftTemplates
+SP_Resource_Main__c.All
 
 force-app/main/default/profiles
+force-app/main/default/objectTranslations

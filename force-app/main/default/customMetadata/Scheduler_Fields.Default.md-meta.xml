@@ -87,6 +87,22 @@
         <value xsi:type="xsd:string">b-fa b-fa-home</value>
     </values>
     <values>
+        <field>Resource_Maintenance_API_Name__c</field>
+        <value xsi:type="xsd:string">SP_Resource_Maintenance__c</value>
+    </values>
+    <values>
+        <field>Resource_Maintenance_End_API_Field__c</field>
+        <value xsi:type="xsd:string">End_Date__c</value>
+    </values>
+    <values>
+        <field>Resource_Maintenance_Resource_API_Field__c</field>
+        <value xsi:type="xsd:string">SP_Resource__c</value>
+    </values>
+    <values>
+        <field>Resource_Maintenance_Start_API_Field__c</field>
+        <value xsi:type="xsd:string">Start_Date__c</value>
+    </values>
+    <values>
         <field>Resource_Name_API_Field__c</field>
         <value xsi:type="xsd:string">Name</value>
     </values>

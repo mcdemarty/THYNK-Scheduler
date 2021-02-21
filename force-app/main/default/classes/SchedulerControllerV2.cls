@@ -26,6 +26,16 @@ public with sharing class SchedulerControllerV2 {
 
 		schedulerData.eventObjectName = schedulerFields.Event_API_Name__c;
 		schedulerData.eventParentResourceFieldAPIName = schedulerFields.Event_Parent_Resource_API_Field__c;
+		schedulerData.eventStartDateFieldAPIName = schedulerFields.Event_Start_Date_API_Field__c;
+		schedulerData.eventEndDateFieldAPIName = schedulerFields.Event_End_Date_API_Field__c;
+
+		List<Id> resources = new List<Id>();
+
+		for (SchedulerResource resource : schedulerData.resources) {
+			resources.add(resource.id);
+		}
+
+		schedulerData.maintenanceTimeRanges = getMaintenanceTimeRanges(fieldMappingMetadataId, startDate, endDate, resources);
 
 		return schedulerData;
 	}
@@ -51,6 +61,10 @@ public with sharing class SchedulerControllerV2 {
 			throw new SchedulerException('This resource isn\'t bookable');
 		}
 
+		if (!getMaintenanceTimeRanges(fieldMappingMetadataId, event.startDate, event.endDate, new List<Id> { event.resourceId }).isEmpty()) {
+			throw new SchedulerException('This resource is in maintenance for this dates');
+		}
+
 		update eventRecord;
 	}
 
@@ -66,7 +80,7 @@ public with sharing class SchedulerControllerV2 {
 		return Boolean.valueOf(resources[0].get(schedulerFields.Resource_Bookable_API_Field__c));
 	}
 
-	public static List<SchedulerResource> getResources(String fieldMappingMetadataId, String resourceCustomFilter, String resourceOrderRule) {
+	private static List<SchedulerResource> getResources(String fieldMappingMetadataId, String resourceCustomFilter, String resourceOrderRule) {
 		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataId);
 
 		Set<String> fieldsToRetrieve = new Set<String> {
@@ -134,7 +148,7 @@ public with sharing class SchedulerControllerV2 {
 		return new List<SchedulerResource>(resources.values());
 	}
 
-	public static List<ResourceColumn> getResourceColumns(String fieldMappingMetadataId) {
+	private static List<ResourceColumn> getResourceColumns(String fieldMappingMetadataId) {
 		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataId);
 
 		List<ResourceColumn> columns = new List<ResourceColumn>();
@@ -167,7 +181,7 @@ public with sharing class SchedulerControllerV2 {
 		return columns;
 	}
 
-	public static List<SchedulerEvent> getEvents(String fieldMappingMetadataId, Datetime startTime, Datetime endTime, String eventCustomFilter) {
+	private static List<SchedulerEvent> getEvents(String fieldMappingMetadataId, Datetime startTime, Datetime endTime, String eventCustomFilter) {
 		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataId);
 
 		Set<String> fieldsToRetrieve = new Set<String> {
@@ -225,6 +239,45 @@ public with sharing class SchedulerControllerV2 {
 		return events;
 	}
 
+	@AuraEnabled
+	public static List<SchedulerTimeRange> getMaintenanceTimeRanges(String fieldMappingMetadataId, Datetime startTime, Datetime endTime, List<Id> resources) {
+		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataId);
+
+		Set<String> fieldsToRetrieve = new Set<String> {
+			schedulerFields.Resource_Maintenance_Start_API_Field__c,
+			schedulerFields.Resource_Maintenance_End_API_Field__c,
+			schedulerFields.Resource_Maintenance_Resource_API_Field__c
+		};
+
+		System.debug(startTime);
+		System.debug(endTime);
+		System.debug(resources);
+
+		String query = 'SELECT ' + String.join(new List<String>(fieldsToRetrieve), ',') + ' FROM ' + schedulerFields.Resource_Maintenance_API_Name__c + ' WHERE ' + schedulerFields.Resource_Maintenance_Resource_API_Field__c + ' IN :resources AND ';
+
+		String startEndWhereClause = String.format('(({0} >= :startTime AND {0} <= :endTime) OR ({1} >= :startTime AND {1} <= :endTime) OR ({0} <= :startTime AND {1} >= :endTime))', new List<String> {
+			schedulerFields.Resource_Maintenance_Start_API_Field__c,
+			schedulerFields.Resource_Maintenance_End_API_Field__c
+		});
+
+		query += startEndWhereClause;
+
+		List<SObject> queriedRanges = Database.query(query);
+
+		System.debug(query);
+		System.debug(queriedRanges);
+
+		List<SchedulerTimeRange> result = new List<SchedulerTimeRange>();
+
+		for (SObject timeRangeRecord : queriedRanges) {
+			SchedulerTimeRange timeRange = new SchedulerTimeRange(timeRangeRecord, schedulerFields);
+
+			result.add(timeRange);
+		}
+
+		return result;
+	}
+
 	private static Scheduler_Fields__mdt getSchedulerFieldMapping(String fieldMappingMetadataId) {
 		if (schedulerFieldMapping != null) {
 			return schedulerFieldMapping;
@@ -267,6 +320,8 @@ public with sharing class SchedulerControllerV2 {
 		@AuraEnabled
 		public List<ResourceColumn> resourceColumns = new List<ResourceColumn>();
 		@AuraEnabled
+		public List<SchedulerTimeRange> maintenanceTimeRanges = new List<SchedulerTimeRange>();
+		@AuraEnabled
 		public List<String> eventEditFields = new List<String>();
 		@AuraEnabled
 		public List<String> eventTooltipFields = new List<String>();
@@ -274,6 +329,10 @@ public with sharing class SchedulerControllerV2 {
 		public String eventObjectName;
 		@AuraEnabled
 		public String eventParentResourceFieldAPIName;
+		@AuraEnabled
+		public String eventStartDateFieldAPIName;
+		@AuraEnabled
+		public String eventEndDateFieldAPIName;
 	}
 
 	public class SchedulerResource {
@@ -352,6 +411,24 @@ public with sharing class SchedulerControllerV2 {
 			}
 
 			eventRecord = event;
+		}
+	}
+
+	public class SchedulerTimeRange {
+		@AuraEnabled
+		public Id id;
+		@AuraEnabled
+		public Datetime startDate;
+		@AuraEnabled
+		public Datetime endDate;
+		@AuraEnabled
+		public Id resourceId;
+
+		public SchedulerTimeRange(SObject resourceTimeRange, Scheduler_Fields__mdt schedulerFields) {
+			id = resourceTimeRange.Id;
+			startDate = Datetime.valueOf(resourceTimeRange.get(schedulerFields.Resource_Maintenance_Start_API_Field__c));
+			endDate = Datetime.valueOf(resourceTimeRange.get(schedulerFields.Resource_Maintenance_End_API_Field__c));
+			resourceId = String.valueOf(resourceTimeRange.get(schedulerFields.Resource_Maintenance_Resource_API_Field__c));
 		}
 	}
 

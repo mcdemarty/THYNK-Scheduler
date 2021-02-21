@@ -73,17 +73,22 @@ export default class SchedulerLwc extends LightningElement {
 
 	// Init actions
 
-	initScheduler() {
+	initScheduler(preserveDates) {
 		this.showSpinner = true;
 
 		const schedulerPreset = this.getCurrentPreset();
 
-		if (this.savedStartDate && this.savedEndDate) {
-			schedulerPreset.startDate = this.savedStartDate;
-			schedulerPreset.endDate = this.savedEndDate;
+		if (preserveDates) {
+			schedulerPreset.startDate = this.customStartDate;
+			schedulerPreset.endDate = this.customEndDate;
+		} else {
+			if (this.savedStartDate && this.savedEndDate) {
+				schedulerPreset.startDate = this.savedStartDate;
+				schedulerPreset.endDate = this.savedEndDate;
 
-			this.savedStartDate = null;
-			this.savedEndDate = null;
+				this.savedStartDate = null;
+				this.savedEndDate = null;
+			}
 		}
 
 		this.startDate = new Date(schedulerPreset.startDate.getFullYear(), schedulerPreset.startDate.getMonth(), schedulerPreset.startDate.getDate(), 0, -new Date().getTimezoneOffset()).toISOString();
@@ -118,6 +123,11 @@ export default class SchedulerLwc extends LightningElement {
 					data: this.mergeEventRecords(extensibleResult.events)
 				});
 
+				const maintenanceTimeRanges = extensibleResult.maintenanceTimeRanges;
+				maintenanceTimeRanges.map(timeRange => {
+					timeRange.style = 'background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2) 10px, rgba(190, 190, 190, 0.2) 10px, rgba(190, 190, 190, 0.2) 20px) rgba(255, 255, 255, 0); color: #888;';
+				});
+
 				const columns = extensibleResult.resourceColumns;
 				const columnsWidth = this.getSavedColumnsWidth();
 
@@ -130,7 +140,9 @@ export default class SchedulerLwc extends LightningElement {
 				let schedulerOptions = {
 					appendTo: this.template.querySelector('.scheduler-container'),
 					minHeight: this.componentHeight,
+
 					enableEventAnimations: false,
+					createEventOnDblClick: false,
 
 					viewPreset : {},
 
@@ -141,6 +153,7 @@ export default class SchedulerLwc extends LightningElement {
 						contextMenu: false,
 						enableEventAnimations: false,
 						dependencies: false,
+						resourceTimeRanges: true,
 
 						eventTooltip: {
 							template: (event) => {
@@ -161,6 +174,7 @@ export default class SchedulerLwc extends LightningElement {
 
 					resourceStore: resourceStore,
 					eventStore: eventStore,
+					resourceTimeRanges: [].concat(maintenanceTimeRanges),
 
 					listeners: {
 						eventDrop: this.eventDropResizeHandler,
@@ -442,7 +456,7 @@ export default class SchedulerLwc extends LightningElement {
 	}
 
 	eventCreateHandler() {
-		this.initScheduler();
+		this.initScheduler(true);
 	}
 
 	moveToNextPeriodClickHandler() {
@@ -521,7 +535,7 @@ export default class SchedulerLwc extends LightningElement {
 
 				this.relatedComponent.showErrorToast(e.message || e.body.message);
 
-				this.relatedComponent.initScheduler();
+				this.relatedComponent.initScheduler(true);
 			});
 	}
 

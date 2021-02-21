@@ -1,6 +1,7 @@
 import { LightningElement, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent'
 import isResourceBookable from '@salesforce/apex/SchedulerControllerV2.isResourceBookable';
+import getMaintenanceTimeRanges from '@salesforce/apex/SchedulerControllerV2.getMaintenanceTimeRanges';
 
 export default class SchedulerEventCreateModal extends LightningElement {
 
@@ -12,6 +13,8 @@ export default class SchedulerEventCreateModal extends LightningElement {
 	@api eventId;
 	@api fieldMappingMetadataId;
 	@api eventParentResourceFieldName;
+	@api eventStartDateFieldName;
+	@api eventEndDateFieldName;
 
 	@api showModal() {
 		this.modalVisible = true;
@@ -33,7 +36,19 @@ export default class SchedulerEventCreateModal extends LightningElement {
 		})
 			.then(result => {
 				if (result) {
-					this.template.querySelector('.record-edit-form').submit();
+					getMaintenanceTimeRanges({
+						fieldMappingMetadataId: this.fieldMappingMetadataId,
+						startTime: event.detail.fields[this.eventStartDateFieldName],
+						endTime: event.detail.fields[this.eventEndDateFieldName],
+						resources: [event.detail.fields[this.eventParentResourceFieldName]]
+					})
+						.then(result => {
+							if (!result.length) {
+								this.template.querySelector('.record-edit-form').submit();
+							} else {
+								this.showErrorToast('This resource is in maintenance for this dates');
+							}
+						});
 				} else {
 					this.showErrorToast('This resource isn\'t bookable');
 				}
