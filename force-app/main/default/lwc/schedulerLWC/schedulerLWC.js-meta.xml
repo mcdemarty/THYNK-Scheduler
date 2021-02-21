@@ -36,6 +36,8 @@
             
             <property name="eventMargin" type="String" label="Event Margin" default="16px"/>
             
+            <property name="eventLayoutType" type="String" label="Event Layout Type" default="stack" datasource="stack,pack,overlap"/>
+            
         </targetConfig>
         
     </targetConfigs>

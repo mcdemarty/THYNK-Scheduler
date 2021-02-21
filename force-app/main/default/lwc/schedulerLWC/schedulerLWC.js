@@ -14,6 +14,7 @@ export default class SchedulerLwc extends LightningElement {
 	@api resourceOrderRule;
 	@api componentHeight;
 	@api eventMargin;
+	@api eventLayoutType;
 
 	VIEW_PRESET = {
 		DAY: 1,
@@ -145,6 +146,8 @@ export default class SchedulerLwc extends LightningElement {
 					createEventOnDblClick: false,
 
 					viewPreset : {},
+
+					eventLayout: this.eventLayoutType || 'stack',
 
 					features: {
 						tree: true,
