@@ -38,6 +38,8 @@ export default class SchedulerLwc extends LightningElement {
 	savedStartDate;
 	savedEndDate;
 
+	savedResourceColumnsFilters;
+
 	collapsedResources;
 
 	isManualCollapseExpand = false;
@@ -139,6 +141,24 @@ export default class SchedulerLwc extends LightningElement {
 
 				extensibleResult.resourceColumns[0].type = 'tree';
 
+				let filterBarOptions = this.enableColumnFiltering || false;
+				if (filterBarOptions) {
+					const filter = [];
+
+					if (this.savedResourceColumnsFilters) {
+						Object.keys(this.savedResourceColumnsFilters).map(filterKey => {
+							filter.push({
+								property: filterKey,
+								value: this.savedResourceColumnsFilters[filterKey]
+							})
+						});
+					}
+
+					filterBarOptions = {
+						filter: filter
+					}
+				}
+
 				let schedulerOptions = {
 					appendTo: this.template.querySelector('.scheduler-container'),
 					minHeight: this.componentHeight,
@@ -158,7 +178,8 @@ export default class SchedulerLwc extends LightningElement {
 						enableEventAnimations: false,
 						dependencies: false,
 						resourceTimeRanges: true,
-						filterBar: this.enableColumnFiltering || false,
+						filterBar: filterBarOptions,
+						stripe: true,
 
 						eventTooltip: {
 							template: (event) => {
@@ -197,6 +218,10 @@ export default class SchedulerLwc extends LightningElement {
 
 				this.scheduler = new bryntum.schedulerpro.SchedulerPro(schedulerOptions);
 
+				if (this.enableColumnFiltering) {
+					this.attachResourceFilterChangeEvents();
+				}
+
 				this.scheduler.relatedComponent = this;
 
 				this.showSpinner = false;
@@ -216,6 +241,16 @@ export default class SchedulerLwc extends LightningElement {
 		state.startDate = new Date(this.customStartDate).toISOString();
 		state.endDate = new Date(this.customEndDate).toISOString();
 
+		state.resourceColumnsFilters = {};
+
+		Array.from(this.template.querySelectorAll('.b-grid-header .b-filter-bar-field-input')).map(filterInput => {
+			if (!filterInput.value) {
+				return;
+			}
+
+			state.resourceColumnsFilters[filterInput.name] = filterInput.value;
+		});
+
 		window.localStorage.setItem(window.location + 'schedulerState', JSON.stringify(state));
 	}
 
@@ -227,11 +262,13 @@ export default class SchedulerLwc extends LightningElement {
 
 		this.collapsedResources = state.collapsedResources;
 		this.currentViewPreset = state.preset;
+		this.savedResourceColumnsFilters = state.resourceColumnsFilters;
 
 		if (state.startDate && state.endDate) {
 			this.savedStartDate = new Date(state.startDate);
 			this.savedEndDate = new Date(state.endDate);
 		}
+
 	}
 
 	saveColumnsWidth() {
@@ -508,6 +545,14 @@ export default class SchedulerLwc extends LightningElement {
 		}
 
 		this.initScheduler();
+	}
+
+	attachResourceFilterChangeEvents() {
+		Array.from(this.template.querySelectorAll('.b-grid-header .b-filter-bar-field-input')).map(filterInput => {
+			filterInput.addEventListener('input', event => {
+				this.saveSchedulerState();
+			});
+		});
 	}
 
 	// Scheduler Listeners
