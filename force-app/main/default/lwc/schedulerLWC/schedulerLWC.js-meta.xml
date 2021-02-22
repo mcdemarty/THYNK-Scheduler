@@ -24,7 +24,7 @@
         
         <targetConfig targets="lightning__RecordPage,lightning__AppPage,lightning__HomePage">
             
-            <property name="schedulerFieldsMetadataId" type="String" label="Field Metadata Id"/>
+            <property name="schedulerFieldsMetadataName" type="String" label="Field Metadata Name"/>
             
             <property name="eventCustomFilter" type="String" label="Event Custom Filter"/>
             

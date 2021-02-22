@@ -11,7 +11,7 @@ export default class SchedulerEventCreateModal extends LightningElement {
 	@api eventObjectName;
 	@api fields;
 	@api eventId;
-	@api fieldMappingMetadataId;
+	@api fieldMappingMetadataName;
 	@api eventParentResourceFieldName;
 	@api eventStartDateFieldName;
 	@api eventEndDateFieldName;
@@ -31,13 +31,13 @@ export default class SchedulerEventCreateModal extends LightningElement {
 		this.showSpinner = true;
 
 		isResourceBookable({
-			fieldMappingMetadataId: this.fieldMappingMetadataId,
+			fieldMappingMetadataName: this.fieldMappingMetadataName,
 			resourceId: event.detail.fields[this.eventParentResourceFieldName]
 		})
 			.then(result => {
 				if (result) {
 					getMaintenanceTimeRanges({
-						fieldMappingMetadataId: this.fieldMappingMetadataId,
+						fieldMappingMetadataName: this.fieldMappingMetadataName,
 						startTime: event.detail.fields[this.eventStartDateFieldName],
 						endTime: event.detail.fields[this.eventEndDateFieldName],
 						resources: [event.detail.fields[this.eventParentResourceFieldName]]

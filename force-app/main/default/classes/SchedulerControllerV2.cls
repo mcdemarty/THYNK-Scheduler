@@ -3,18 +3,18 @@ public with sharing class SchedulerControllerV2 {
 	private static Scheduler_Fields__mdt schedulerFieldMapping;
 
 	@AuraEnabled(Cacheable=false)
-	public static SchedulerData getSchedulerData(String fieldMappingMetadataId, Datetime startDate, Datetime endDate, String eventCustomFilter, String resourceCustomFilter, String resourceOrderRule) {
+	public static SchedulerData getSchedulerData(String fieldMappingMetadataName, Datetime startDate, Datetime endDate, String eventCustomFilter, String resourceCustomFilter, String resourceOrderRule) {
 		if (!FeatureManagement.checkPermission(getPackagedName('Scheduler')) && !Test.isRunningTest()) {
 			throw new SchedulerException('No permissions to access the Scheduler');
 		}
 
-		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataId);
+		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
 		SchedulerData schedulerData = new SchedulerData();
 
-		schedulerData.resources = getResources(fieldMappingMetadataId, resourceCustomFilter, resourceOrderRule);
-		schedulerData.events = getEvents(fieldMappingMetadataId, startDate, endDate, eventCustomFilter);
-		schedulerData.resourceColumns = getResourceColumns(fieldMappingMetadataId);
+		schedulerData.resources = getResources(fieldMappingMetadataName, resourceCustomFilter, resourceOrderRule);
+		schedulerData.events = getEvents(fieldMappingMetadataName, startDate, endDate, eventCustomFilter);
+		schedulerData.resourceColumns = getResourceColumns(fieldMappingMetadataName);
 
 		if (String.isNotEmpty(schedulerFields.Event_Edit_Mode_Fields__c)) {
 			schedulerData.eventEditFields = schedulerFields.Event_Edit_Mode_Fields__c.replaceAll(' ', '').split(',');
@@ -35,15 +35,15 @@ public with sharing class SchedulerControllerV2 {
 			resources.add(resource.id);
 		}
 
-		schedulerData.maintenanceTimeRanges = getMaintenanceTimeRanges(fieldMappingMetadataId, startDate, endDate, resources);
+		schedulerData.maintenanceTimeRanges = getMaintenanceTimeRanges(fieldMappingMetadataName, startDate, endDate, resources);
 
 		return schedulerData;
 	}
 
 	@AuraEnabled
-	public static void saveEvent(String fieldMappingMetadataId, String eventJSON) {
+	public static void saveEvent(String fieldMappingMetadataName, String eventJSON) {
 		SchedulerEvent event = (SchedulerEvent)JSON.deserialize(eventJSON, SchedulerEvent.class);
-		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataId);
+		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
 		if (!Schema.getGlobalDescribe().get(schedulerFields.Event_API_Name__c).getDescribe().isCreateable()) {
 			throw new SchedulerFieldMappingException('Not enough permissions to create ' + schedulerFields.Event_API_Name__c + ' record');
@@ -57,11 +57,11 @@ public with sharing class SchedulerControllerV2 {
 		eventRecord.put(schedulerFields.Event_End_Date_API_Field__c, event.endDate);
 		eventRecord.put(schedulerFields.Event_Parent_Resource_API_Field__c, event.resourceId);
 
-		if (!isResourceBookable(fieldMappingMetadataId, event.resourceId)) {
+		if (!isResourceBookable(fieldMappingMetadataName, event.resourceId)) {
 			throw new SchedulerException('This resource isn\'t bookable');
 		}
 
-		if (!getMaintenanceTimeRanges(fieldMappingMetadataId, event.startDate, event.endDate, new List<Id> { event.resourceId }).isEmpty()) {
+		if (!getMaintenanceTimeRanges(fieldMappingMetadataName, event.startDate, event.endDate, new List<Id> { event.resourceId }).isEmpty()) {
 			throw new SchedulerException('This resource is in maintenance for this dates');
 		}
 
@@ -69,8 +69,8 @@ public with sharing class SchedulerControllerV2 {
 	}
 
 	@AuraEnabled
-	public static Boolean isResourceBookable(String fieldMappingMetadataId, Id resourceId) {
-		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataId);
+	public static Boolean isResourceBookable(String fieldMappingMetadataName, Id resourceId) {
+		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
 		List<SObject> resources = Database.query(String.format('SELECT {0} FROM {1} WHERE Id = :resourceId', new List<String> {
 			schedulerFields.Resource_Bookable_API_Field__c,
@@ -80,8 +80,8 @@ public with sharing class SchedulerControllerV2 {
 		return Boolean.valueOf(resources[0].get(schedulerFields.Resource_Bookable_API_Field__c));
 	}
 
-	private static List<SchedulerResource> getResources(String fieldMappingMetadataId, String resourceCustomFilter, String resourceOrderRule) {
-		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataId);
+	private static List<SchedulerResource> getResources(String fieldMappingMetadataName, String resourceCustomFilter, String resourceOrderRule) {
+		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
 		Set<String> fieldsToRetrieve = new Set<String> {
 			schedulerFields.Resource_Name_API_Field__c,
@@ -148,8 +148,8 @@ public with sharing class SchedulerControllerV2 {
 		return new List<SchedulerResource>(resources.values());
 	}
 
-	private static List<ResourceColumn> getResourceColumns(String fieldMappingMetadataId) {
-		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataId);
+	private static List<ResourceColumn> getResourceColumns(String fieldMappingMetadataName) {
+		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
 		List<ResourceColumn> columns = new List<ResourceColumn>();
 
@@ -181,8 +181,8 @@ public with sharing class SchedulerControllerV2 {
 		return columns;
 	}
 
-	private static List<SchedulerEvent> getEvents(String fieldMappingMetadataId, Datetime startTime, Datetime endTime, String eventCustomFilter) {
-		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataId);
+	private static List<SchedulerEvent> getEvents(String fieldMappingMetadataName, Datetime startTime, Datetime endTime, String eventCustomFilter) {
+		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
 		Set<String> fieldsToRetrieve = new Set<String> {
 			schedulerFields.Event_Start_Date_API_Field__c,
@@ -240,8 +240,8 @@ public with sharing class SchedulerControllerV2 {
 	}
 
 	@AuraEnabled
-	public static List<SchedulerTimeRange> getMaintenanceTimeRanges(String fieldMappingMetadataId, Datetime startTime, Datetime endTime, List<Id> resources) {
-		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataId);
+	public static List<SchedulerTimeRange> getMaintenanceTimeRanges(String fieldMappingMetadataName, Datetime startTime, Datetime endTime, List<Id> resources) {
+		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
 		Set<String> fieldsToRetrieve = new Set<String> {
 			schedulerFields.Resource_Maintenance_Start_API_Field__c,
@@ -271,7 +271,7 @@ public with sharing class SchedulerControllerV2 {
 		return result;
 	}
 
-	private static Scheduler_Fields__mdt getSchedulerFieldMapping(String fieldMappingMetadataId) {
+	private static Scheduler_Fields__mdt getSchedulerFieldMapping(String fieldMappingMetadataName) {
 		if (schedulerFieldMapping != null) {
 			return schedulerFieldMapping;
 		}
@@ -290,10 +290,10 @@ public with sharing class SchedulerControllerV2 {
 			}
 		}
 
-		List<Scheduler_Fields__mdt> schedulerFields = Database.query('SELECT ' + String.join(new List<String>(fieldsToRetrieve), ',') + ' FROM ' + Scheduler_Fields__mdt.getSObjectType().getDescribe().getName() + ' WHERE Id = :fieldMappingMetadataId');
+		List<Scheduler_Fields__mdt> schedulerFields = Database.query('SELECT ' + String.join(new List<String>(fieldsToRetrieve), ',') + ' FROM ' + Scheduler_Fields__mdt.getSObjectType().getDescribe().getName() + ' WHERE DeveloperName = :fieldMappingMetadataName');
 
 		if (schedulerFields.isEmpty()) {
-			throw new SchedulerFieldMappingException('Scheduler Fields record with Id ' + fieldMappingMetadataId + ' not found');
+			throw new SchedulerFieldMappingException('Scheduler Fields record with Name ' + fieldMappingMetadataName + ' not found');
 		}
 
 		schedulerFieldMapping = schedulerFields[0];

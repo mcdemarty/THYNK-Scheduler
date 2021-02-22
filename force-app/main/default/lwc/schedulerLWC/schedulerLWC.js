@@ -8,7 +8,7 @@ import SCHEDULER from '@salesforce/resourceUrl/Scheduler';
 
 export default class SchedulerLwc extends LightningElement {
 
-	@api schedulerFieldsMetadataId;
+	@api schedulerFieldsMetadataName;
 	@api eventCustomFilter;
 	@api resourceCustomFilter;
 	@api resourceOrderRule;
@@ -102,7 +102,7 @@ export default class SchedulerLwc extends LightningElement {
 		this.saveSchedulerState();
 
 		getSchedulerData({
-			fieldMappingMetadataId: this.schedulerFieldsMetadataId,
+			fieldMappingMetadataName: this.schedulerFieldsMetadataName,
 			startDate: schedulerPreset.startDate.toISOString(),
 			endDate: schedulerPreset.endDate.toISOString(),
 			eventCustomFilter: this.eventCustomFilter,
@@ -529,7 +529,7 @@ export default class SchedulerLwc extends LightningElement {
 		}
 
 		saveEvent({
-			fieldMappingMetadataId: this.relatedComponent.schedulerFieldsMetadataId,
+			fieldMappingMetadataName: this.relatedComponent.schedulerFieldsMetadataName,
 			eventJSON: JSON.stringify(changedEvent)
 		})
 			.then(() => {
