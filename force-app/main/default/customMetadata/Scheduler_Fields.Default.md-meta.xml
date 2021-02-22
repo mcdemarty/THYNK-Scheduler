@@ -51,6 +51,10 @@
         <value xsi:type="xsd:string">Status__c</value>
     </values>
     <values>
+        <field>Event_Style_API_Field__c</field>
+        <value xsi:type="xsd:string">Style__c</value>
+    </values>
+    <values>
         <field>Event_Tooltip_Fields__c</field>
         <value xsi:type="xsd:string">Id, Name, Start_Date__c</value>
     </values>

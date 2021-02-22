@@ -190,7 +190,8 @@ public with sharing class SchedulerControllerV2 {
 			schedulerFields.Event_Name_API_Field__c,
 			schedulerFields.Event_Parent_Resource_API_Field__c,
 			schedulerFields.Event_Color_API_Field__c,
-			schedulerFields.Event_Icon_API_Field__c
+			schedulerFields.Event_Icon_API_Field__c,
+			schedulerFields.Event_Style_API_Field__c
 		};
 
 		if (String.isNotEmpty(schedulerFields.Event_Tooltip_Fields__c)) {
@@ -380,6 +381,8 @@ public with sharing class SchedulerControllerV2 {
 		@AuraEnabled
 		public String eventColor;
 		@AuraEnabled
+		public String eventStyle;
+		@AuraEnabled
 		public String iconCls;
 		@AuraEnabled
 		public SObject eventRecord;
@@ -401,6 +404,12 @@ public with sharing class SchedulerControllerV2 {
 				iconCls = String.valueOf(event.get(schedulerFields.Event_Icon_API_Field__c));
 			} else {
 				iconCls = schedulerFields.Event_Icon__c;
+			}
+
+			if (event.get(schedulerFields.Event_Style_API_Field__c) != null) {
+				eventStyle = String.valueOf(event.get(schedulerFields.Event_Style_API_Field__c)).toLowerCase();
+			} else {
+				eventStyle = 'plain';
 			}
 
 			eventRecord = event;
