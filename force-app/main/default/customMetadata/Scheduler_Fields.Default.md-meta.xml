@@ -142,4 +142,28 @@
         <field>Resource_Type_API_Name__c</field>
         <value xsi:type="xsd:string">Type__c</value>
     </values>
+    <values>
+        <field>Time_Range_API_Name__c</field>
+        <value xsi:type="xsd:string">SP_Time_Range__c</value>
+    </values>
+    <values>
+        <field>Time_Range_Color_API_Field__c</field>
+        <value xsi:type="xsd:string">Color__c</value>
+    </values>
+    <values>
+        <field>Time_Range_End_Date_API_Field__c</field>
+        <value xsi:type="xsd:string">End_Date__c</value>
+    </values>
+    <values>
+        <field>Time_Range_Icon_API_Field__c</field>
+        <value xsi:type="xsd:string">Icon__c</value>
+    </values>
+    <values>
+        <field>Time_Range_Name_API_Field__c</field>
+        <value xsi:type="xsd:string">Name</value>
+    </values>
+    <values>
+        <field>Time_Range_Start_Date_API_Field__c</field>
+        <value xsi:type="xsd:string">Start_Date__c</value>
+    </values>
 </CustomMetadata>

@@ -2,6 +2,7 @@ import { LightningElement, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent'
 import isResourceBookable from '@salesforce/apex/SchedulerControllerV2.isResourceBookable';
 import getMaintenanceTimeRanges from '@salesforce/apex/SchedulerControllerV2.getMaintenanceTimeRanges';
+import getTimeRanges from '@salesforce/apex/SchedulerControllerV2.getTimeRanges';
 
 export default class SchedulerEventCreateModal extends LightningElement {
 
@@ -44,7 +45,18 @@ export default class SchedulerEventCreateModal extends LightningElement {
 					})
 						.then(result => {
 							if (!result.length) {
-								this.template.querySelector('.record-edit-form').submit();
+								getTimeRanges({
+									fieldMappingMetadataName: this.fieldMappingMetadataName,
+									startTime: event.detail.fields[this.eventStartDateFieldName],
+									endTime: event.detail.fields[this.eventEndDateFieldName],
+								})
+									.then(result => {
+										if (!result.length) {
+											this.template.querySelector('.record-edit-form').submit();
+										} else {
+											this.showErrorToast('This dates are in maintenance');
+										}
+									});
 							} else {
 								this.showErrorToast('This resource is in maintenance for this dates');
 							}

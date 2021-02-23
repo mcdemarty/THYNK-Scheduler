@@ -178,6 +178,7 @@ export default class SchedulerLwc extends LightningElement {
 						enableEventAnimations: false,
 						dependencies: false,
 						resourceTimeRanges: true,
+						timeRanges: true,
 						filterBar: filterBarOptions,
 						stripe: true,
 
@@ -201,6 +202,7 @@ export default class SchedulerLwc extends LightningElement {
 					resourceStore: resourceStore,
 					eventStore: eventStore,
 					resourceTimeRanges: [].concat(maintenanceTimeRanges),
+					timeRanges: [].concat(extensibleResult.timeRanges),
 
 					listeners: {
 						eventDrop: this.eventDropResizeHandler,
