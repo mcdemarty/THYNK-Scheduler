@@ -16,6 +16,7 @@ export default class SchedulerLwc extends LightningElement {
 	@api eventMargin;
 	@api eventLayoutType;
 	@api enableColumnFiltering;
+	@api responsiveType;
 
 	VIEW_PRESET = {
 		DAY: 1,
@@ -170,6 +171,8 @@ export default class SchedulerLwc extends LightningElement {
 
 					eventLayout: this.eventLayoutType || 'stack',
 
+					fillTicks: this.responsiveType === 'Small',
+
 					features: {
 						tree: true,
 						eventContextMenu: false,
@@ -179,7 +182,7 @@ export default class SchedulerLwc extends LightningElement {
 						dependencies: false,
 						resourceTimeRanges: true,
 						timeRanges: true,
-						filterBar: filterBarOptions,
+						filterBar: this.responsiveType !== 'Small' ? filterBarOptions : false,
 						stripe: true,
 
 						eventTooltip: {
