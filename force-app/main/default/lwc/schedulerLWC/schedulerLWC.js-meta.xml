@@ -24,7 +24,7 @@
         
         <targetConfig targets="lightning__RecordPage,lightning__AppPage,lightning__HomePage">
             
-            <property name="schedulerFieldsMetadataId" type="String" label="Field Metadata Id"/>
+            <property name="schedulerFieldsMetadataName" type="String" label="Field Metadata Name"/>
             
             <property name="eventCustomFilter" type="String" label="Event Custom Filter"/>
             
@@ -37,6 +37,8 @@
             <property name="eventMargin" type="String" label="Event Margin" default="16px"/>
             
             <property name="eventLayoutType" type="String" label="Event Layout Type" default="stack" datasource="stack,pack,overlap"/>
+            
+            <property name="responsiveType" type="String" label="Responsive" default="Normal" datasource="Normal,Small"/>
             
             <property name="enableColumnFiltering" type="Boolean" label="Event Column Filtering"/>
             

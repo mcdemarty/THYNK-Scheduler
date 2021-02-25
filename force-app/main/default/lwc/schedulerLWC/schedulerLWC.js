@@ -8,7 +8,7 @@ import SCHEDULER from '@salesforce/resourceUrl/Scheduler';
 
 export default class SchedulerLwc extends LightningElement {
 
-	@api schedulerFieldsMetadataId;
+	@api schedulerFieldsMetadataName;
 	@api eventCustomFilter;
 	@api resourceCustomFilter;
 	@api resourceOrderRule;
@@ -16,6 +16,7 @@ export default class SchedulerLwc extends LightningElement {
 	@api eventMargin;
 	@api eventLayoutType;
 	@api enableColumnFiltering;
+	@api responsiveType;
 
 	VIEW_PRESET = {
 		DAY: 1,
@@ -37,6 +38,8 @@ export default class SchedulerLwc extends LightningElement {
 
 	savedStartDate;
 	savedEndDate;
+
+	savedResourceColumnsFilters;
 
 	collapsedResources;
 
@@ -102,7 +105,7 @@ export default class SchedulerLwc extends LightningElement {
 		this.saveSchedulerState();
 
 		getSchedulerData({
-			fieldMappingMetadataId: this.schedulerFieldsMetadataId,
+			fieldMappingMetadataName: this.schedulerFieldsMetadataName,
 			startDate: schedulerPreset.startDate.toISOString(),
 			endDate: schedulerPreset.endDate.toISOString(),
 			eventCustomFilter: this.eventCustomFilter,
@@ -139,6 +142,24 @@ export default class SchedulerLwc extends LightningElement {
 
 				extensibleResult.resourceColumns[0].type = 'tree';
 
+				let filterBarOptions = this.enableColumnFiltering || false;
+				if (filterBarOptions) {
+					const filter = [];
+
+					if (this.savedResourceColumnsFilters) {
+						Object.keys(this.savedResourceColumnsFilters).map(filterKey => {
+							filter.push({
+								property: filterKey,
+								value: this.savedResourceColumnsFilters[filterKey]
+							})
+						});
+					}
+
+					filterBarOptions = {
+						filter: filter
+					}
+				}
+
 				let schedulerOptions = {
 					appendTo: this.template.querySelector('.scheduler-container'),
 					minHeight: this.componentHeight,
@@ -150,6 +171,8 @@ export default class SchedulerLwc extends LightningElement {
 
 					eventLayout: this.eventLayoutType || 'stack',
 
+					fillTicks: this.responsiveType === 'Small',
+
 					features: {
 						tree: true,
 						eventContextMenu: false,
@@ -158,7 +181,9 @@ export default class SchedulerLwc extends LightningElement {
 						enableEventAnimations: false,
 						dependencies: false,
 						resourceTimeRanges: true,
-						filterBar: this.enableColumnFiltering || false,
+						timeRanges: true,
+						filterBar: this.responsiveType !== 'Small' ? filterBarOptions : false,
+						stripe: true,
 
 						eventTooltip: {
 							template: (event) => {
@@ -180,6 +205,7 @@ export default class SchedulerLwc extends LightningElement {
 					resourceStore: resourceStore,
 					eventStore: eventStore,
 					resourceTimeRanges: [].concat(maintenanceTimeRanges),
+					timeRanges: [].concat(extensibleResult.timeRanges),
 
 					listeners: {
 						eventDrop: this.eventDropResizeHandler,
@@ -196,6 +222,10 @@ export default class SchedulerLwc extends LightningElement {
 				this.template.querySelector('.b-float-root').innerHTML = '';
 
 				this.scheduler = new bryntum.schedulerpro.SchedulerPro(schedulerOptions);
+
+				if (this.enableColumnFiltering) {
+					this.attachResourceFilterChangeEvents();
+				}
 
 				this.scheduler.relatedComponent = this;
 
@@ -216,6 +246,16 @@ export default class SchedulerLwc extends LightningElement {
 		state.startDate = new Date(this.customStartDate).toISOString();
 		state.endDate = new Date(this.customEndDate).toISOString();
 
+		state.resourceColumnsFilters = {};
+
+		Array.from(this.template.querySelectorAll('.b-grid-header .b-filter-bar-field-input')).map(filterInput => {
+			if (!filterInput.value) {
+				return;
+			}
+
+			state.resourceColumnsFilters[filterInput.name] = filterInput.value;
+		});
+
 		window.localStorage.setItem(window.location + 'schedulerState', JSON.stringify(state));
 	}
 
@@ -227,11 +267,13 @@ export default class SchedulerLwc extends LightningElement {
 
 		this.collapsedResources = state.collapsedResources;
 		this.currentViewPreset = state.preset;
+		this.savedResourceColumnsFilters = state.resourceColumnsFilters;
 
 		if (state.startDate && state.endDate) {
 			this.savedStartDate = new Date(state.startDate);
 			this.savedEndDate = new Date(state.endDate);
 		}
+
 	}
 
 	saveColumnsWidth() {
@@ -510,6 +552,14 @@ export default class SchedulerLwc extends LightningElement {
 		this.initScheduler();
 	}
 
+	attachResourceFilterChangeEvents() {
+		Array.from(this.template.querySelectorAll('.b-grid-header .b-filter-bar-field-input')).map(filterInput => {
+			filterInput.addEventListener('input', event => {
+				this.saveSchedulerState();
+			});
+		});
+	}
+
 	// Scheduler Listeners
 
 	eventDropResizeHandler(event) {
@@ -529,7 +579,7 @@ export default class SchedulerLwc extends LightningElement {
 		}
 
 		saveEvent({
-			fieldMappingMetadataId: this.relatedComponent.schedulerFieldsMetadataId,
+			fieldMappingMetadataName: this.relatedComponent.schedulerFieldsMetadataName,
 			eventJSON: JSON.stringify(changedEvent)
 		})
 			.then(() => {
