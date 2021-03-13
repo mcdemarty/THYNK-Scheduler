@@ -39,6 +39,9 @@ export default class SchedulerLwc extends LightningElement {
 	savedStartDate;
 	savedEndDate;
 
+	minSelectableEndDate;
+	maxSelectableStartDate;
+
 	savedResourceColumnsFilters;
 
 	collapsedResources;
@@ -102,6 +105,9 @@ export default class SchedulerLwc extends LightningElement {
 		this.customStartDate = schedulerPreset.startDate;
 		this.customEndDate = schedulerPreset.endDate;
 
+		this.minSelectableEndDate = this.startDate;
+		this.maxSelectableStartDate = this.endDate;
+
 		this.saveSchedulerState();
 
 		getSchedulerData({
@@ -161,7 +167,6 @@ export default class SchedulerLwc extends LightningElement {
 				}
 
 				let schedulerOptions = {
-					appendTo: this.template.querySelector('.scheduler-container'),
 					minHeight: this.componentHeight,
 
 					enableEventAnimations: false,
@@ -219,9 +224,13 @@ export default class SchedulerLwc extends LightningElement {
 				schedulerOptions = Object.assign(schedulerOptions, schedulerPreset);
 
 				this.template.querySelector('.scheduler-container').innerHTML = '';
-				this.template.querySelector('.b-float-root').innerHTML = '';
 
 				this.scheduler = new bryntum.schedulerpro.SchedulerPro(schedulerOptions);
+				this.scheduler.render(this.template.querySelector('.scheduler-container'));
+
+				setTimeout(() => {
+					this.template.querySelector('.b-float-root').innerHTML = '';
+				}, 0);
 
 				if (this.enableColumnFiltering) {
 					this.attachResourceFilterChangeEvents();
@@ -481,6 +490,12 @@ export default class SchedulerLwc extends LightningElement {
 	}
 
 	startDateInputChangeHandler(event) {
+		if (!event.target.checkValidity()) {
+			event.target.value = this.startDate;
+
+			return;
+		}
+
 		this.currentViewPreset = this.VIEW_PRESET.CUSTOM;
 
 		this.customStartDate = new Date(event.target.value);
@@ -489,6 +504,12 @@ export default class SchedulerLwc extends LightningElement {
 	}
 
 	endDateInputChangeHandler(event) {
+		if (!event.target.checkValidity()) {
+			event.target.value = this.endDate;
+
+			return;
+		}
+
 		this.currentViewPreset = this.VIEW_PRESET.CUSTOM;
 
 		this.customEndDate = new Date(event.target.value);
@@ -622,6 +643,10 @@ export default class SchedulerLwc extends LightningElement {
 	}
 
 	get viewPresetPicklistValue() {
+		if (!this.currentViewPreset) {
+			return this.VIEW_PRESET.WEEK.toString();
+		}
+
 		return this.currentViewPreset.toString();
 	}
 
