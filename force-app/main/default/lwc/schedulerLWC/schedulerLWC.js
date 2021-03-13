@@ -44,6 +44,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	maxSelectableStartDate;
 
 	savedResourceColumnsFilters;
+	resourceColumnsFiltersChanged = false;
 
 	collapsedResources;
 
@@ -277,15 +278,23 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		state.startDate = new Date(this.customStartDate).toISOString();
 		state.endDate = new Date(this.customEndDate).toISOString();
 
-		state.resourceColumnsFilters = {};
+		if (!state.resourceColumnsFilters) {
+			state.resourceColumnsFilters = {};
+		}
 
-		Array.from(this.template.querySelectorAll('.b-grid-header .b-filter-bar-field-input')).map(filterInput => {
-			if (!filterInput.value) {
-				return;
-			}
+		if (!this.resourceColumnsFiltersChanged) {
+			state.resourceColumnsFilters = this.savedResourceColumnsFilters || {};
+		} else {
+			Array.from(this.template.querySelectorAll('.b-grid-header .b-filter-bar-field-input')).map(filterInput => {
+				if (!filterInput.value) {
+					return;
+				}
 
-			state.resourceColumnsFilters[filterInput.name] = filterInput.value;
-		});
+				state.resourceColumnsFilters[filterInput.name] = filterInput.value;
+			});
+		}
+
+		this.savedResourceColumnsFilters = state.resourceColumnsFilters;
 
 		window.localStorage.setItem(window.location + 'schedulerState', JSON.stringify(state));
 	}
@@ -304,7 +313,6 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			this.savedStartDate = new Date(state.startDate);
 			this.savedEndDate = new Date(state.endDate);
 		}
-
 	}
 
 	saveColumnsWidth() {
@@ -598,6 +606,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	attachResourceFilterChangeEvents() {
 		Array.from(this.template.querySelectorAll('.b-grid-header .b-filter-bar-field-input')).map(filterInput => {
 			filterInput.addEventListener('input', event => {
+				this.resourceColumnsFiltersChanged = true;
+
 				this.saveSchedulerState();
 			});
 		});
