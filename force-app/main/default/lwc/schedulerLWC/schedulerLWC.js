@@ -1,12 +1,13 @@
 import { LightningElement, api } from 'lwc';
 import { loadScript, loadStyle } from "lightning/platformResourceLoader";
 import { ShowToastEvent } from 'lightning/platformShowToastEvent'
+import { NavigationMixin } from 'lightning/navigation';
 import getSchedulerData from '@salesforce/apex/SchedulerControllerV2.getSchedulerData';
 import saveEvent from '@salesforce/apex/SchedulerControllerV2.saveEvent';
 
 import SCHEDULER from '@salesforce/resourceUrl/Scheduler';
 
-export default class SchedulerLwc extends LightningElement {
+export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 	@api schedulerFieldsMetadataName;
 	@api eventCustomFilter;
@@ -66,11 +67,13 @@ export default class SchedulerLwc extends LightningElement {
 			loadStyle(this, SCHEDULER + "/scheduler.stockholm.css")
 		])
 			.then(() => {
-				bryntum.schedulerpro.init(this.template);
+				setTimeout(() => {
+					// bryntum.schedulerpro.init(this.template);
 
-				this.loadSchedulerState();
+					this.loadSchedulerState();
 
-				this.initScheduler();
+					this.initScheduler();
+				}, 0);
 			})
 			.catch(e => {
 				console.error(e);
@@ -180,7 +183,6 @@ export default class SchedulerLwc extends LightningElement {
 
 					features: {
 						tree: true,
-						eventContextMenu: false,
 						eventDragCreate: false,
 						contextMenu: false,
 						enableEventAnimations: false,
@@ -189,6 +191,26 @@ export default class SchedulerLwc extends LightningElement {
 						timeRanges: true,
 						filterBar: this.responsiveType !== 'Small' ? filterBarOptions : false,
 						stripe: true,
+
+						eventMenu: {
+							items: {
+								deleteEvent: false,
+								unassignEvent: false,
+
+								extraItem: {
+									text: 'Open Event',
+									onItem: ({eventRecord}) => {
+										this[NavigationMixin.Navigate]({
+											type: 'standard__recordPage',
+											attributes: {
+												recordId: eventRecord.id,
+												actionName: 'view'
+											}
+										});
+									}
+								}
+							}
+						},
 
 						eventTooltip: {
 							template: (event) => {
