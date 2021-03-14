@@ -98,6 +98,10 @@ public without sharing class SchedulerControllerV2 {
 			fieldsToRetrieve.addAll(schedulerFields.Resource_Display_Columns_API_Fields__c.replaceAll(' ', '').split(','));
 		}
 
+		if (!String.isEmpty(schedulerFields.Resource_Hidden_Columns_API_Fields__c)) {
+			fieldsToRetrieve.addAll(schedulerFields.Resource_Hidden_Columns_API_Fields__c.replaceAll(' ', '').split(','));
+		}
+
 		Map<String, SObjectType> schemaGlobalDescribeResult = Schema.getGlobalDescribe();
 
 		if (!schemaGlobalDescribeResult.containsKey(schedulerFields.Resource_API_Name__c)) {
@@ -159,6 +163,7 @@ public without sharing class SchedulerControllerV2 {
 		List<ResourceColumn> columns = new List<ResourceColumn>();
 
 		List<String> fields = schedulerFields.Resource_Display_Columns_API_Fields__c.toLowerCase().split(',');
+		List<String> hiddenFields = schedulerFields.Resource_Hidden_Columns_API_Fields__c.toLowerCase().split(',');
 
 		if (fields.isEmpty()) {
 			return columns;
@@ -179,6 +184,25 @@ public without sharing class SchedulerControllerV2 {
 
 			resourceColumn.text = describeFieldResult.getLabel();
 			resourceColumn.field = describeFieldResult.getName();
+			resourceColumn.hidden = false;
+
+			columns.add(resourceColumn);
+		}
+
+		for (String field : hiddenFields) {
+			String trimmedField = field.trim();
+
+			if (!fieldsDescribeSource.containsKey(trimmedField)) {
+				throw new SchedulerFieldMappingException('Field ' + trimmedField + ' not found');
+			}
+
+			DescribeFieldResult describeFieldResult = fieldsDescribeSource.get(trimmedField).getDescribe();
+
+			ResourceColumn resourceColumn = new ResourceColumn();
+
+			resourceColumn.text = describeFieldResult.getLabel();
+			resourceColumn.field = describeFieldResult.getName();
+			resourceColumn.hidden = true;
 
 			columns.add(resourceColumn);
 		}
@@ -510,9 +534,11 @@ public without sharing class SchedulerControllerV2 {
 		@AuraEnabled
 		public String field;
 		@AuraEnabled
-		public Boolean sortable = false;
+		public Boolean sortable = true;
 		@AuraEnabled
 		public Boolean draggable = false;
+		@AuraEnabled
+		public Boolean hidden = false;
 	}
 
 	public class SchedulerFieldMappingException extends Exception {}

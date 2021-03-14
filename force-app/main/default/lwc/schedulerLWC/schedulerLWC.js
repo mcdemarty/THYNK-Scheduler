@@ -69,7 +69,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		])
 			.then(() => {
 				setTimeout(() => {
-					// bryntum.schedulerpro.init(this.template);
+					bryntum.schedulerpro.init(this.template.querySelector('.scheduler-init-container'));
 
 					this.loadSchedulerState();
 
@@ -246,13 +246,17 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 				schedulerOptions = Object.assign(schedulerOptions, schedulerPreset);
 
-				this.template.querySelector('.scheduler-container').innerHTML = '';
+				if (this.template.querySelector('.scheduler-container')) {
+					this.template.querySelector('.scheduler-container').innerHTML = '';
+				}
 
 				this.scheduler = new bryntum.schedulerpro.SchedulerPro(schedulerOptions);
 				this.scheduler.render(this.template.querySelector('.scheduler-container'));
 
 				setTimeout(() => {
-					this.template.querySelector('.b-float-root').innerHTML = '';
+					if (this.template.querySelector('.b-float-root')) {
+						this.template.querySelector('.b-float-root').innerHTML = '';
+					}
 				}, 0);
 
 				if (this.enableColumnFiltering) {
