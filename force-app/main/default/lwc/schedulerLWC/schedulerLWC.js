@@ -213,6 +213,28 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 							}
 						},
 
+						timeAxisHeaderMenu: {
+							items: {
+								eventsFilter: false,
+								dateRange: {
+									menu: {
+										items: {
+											todayBtn: {
+												onItem: () => {
+													console.log('todayBtn');
+												}
+											},
+											startDateField: {
+												onItem: () => {
+													console.log('startDateField');
+												}
+											}
+										}
+									}
+								}
+							}
+						},
+
 						eventTooltip: {
 							template: (event) => {
 								let template = '';
@@ -240,7 +262,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 						eventResizeEnd: this.eventDropResizeHandler,
 						collapseNode: this.eventCollapsedExpandedHandler,
 						expandNode: this.eventCollapsedExpandedHandler,
-						eventClick: this.eventClickHandler
+						eventClick: this.eventClickHandler,
+						timeAxisChange: this.timeAxisChangeHandler
 					}
 				}
 
@@ -668,6 +691,23 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	eventClickHandler(event) {
 		this.relatedComponent.selectedEventId = event.eventRecord.id;
 		this.relatedComponent.template.querySelector('.scheduler-event-create-modal').showModal();
+	}
+
+	timeAxisChangeHandler(event) {
+		this.relatedComponent.currentViewPreset = this.relatedComponent.VIEW_PRESET.CUSTOM;
+
+		if (this.relatedComponent.updatePresetInterval) {
+			clearInterval(this.relatedComponent.updatePresetInterval);
+		}
+
+		this.relatedComponent.updatePresetInterval = setInterval(() => {
+			this.relatedComponent.savedStartDate = event.startDate;
+			this.relatedComponent.savedEndDate = event.endDate;
+
+			this.relatedComponent.initScheduler();
+
+			clearInterval(this.relatedComponent.updatePresetInterval);
+		}, 1000);
 	}
 
 	showErrorToast(message) {
