@@ -76,7 +76,7 @@
     </values>
     <values>
         <field>Resource_Display_Columns_API_Fields__c</field>
-        <value xsi:type="xsd:string">Name, Id, Bookable__c</value>
+        <value xsi:type="xsd:string">Name, Id, Bookable__c, Owner.Name</value>
     </values>
     <values>
         <field>Resource_Hidden_Columns_API_Fields__c</field>

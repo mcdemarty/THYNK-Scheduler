@@ -125,6 +125,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			.then(result => {
 				const extensibleResult = JSON.parse(JSON.stringify(result));
 
+				console.log(extensibleResult);
+
 				this.schedulerData = extensibleResult;
 
 				this.removeEmptyChildrenArrays(extensibleResult.resources);
@@ -240,7 +242,23 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 								let template = '';
 
 								this.schedulerData.eventTooltipFields.map(field => {
-									template += `<div>${event.eventRecord[field]}</div>`;
+									let value = event.eventRecord[field];
+									let currentObjectLevel = event.eventRecord;
+
+									if (field.includes('.')) {
+										const fieldParts = field.split('.');
+										let i = 0;
+
+										while (typeof currentObjectLevel === 'object' && currentObjectLevel != null) {
+											currentObjectLevel = currentObjectLevel[fieldParts[i]];
+
+											i++;
+										}
+
+										value = currentObjectLevel;
+									}
+
+									template += `<div>${value}</div>`;
 								});
 
 								return template;
