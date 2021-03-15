@@ -138,6 +138,10 @@
                 <behavior>Edit</behavior>
                 <field>Resource_Type_API_Name__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Resource_Hidden_Columns_API_Fields__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>

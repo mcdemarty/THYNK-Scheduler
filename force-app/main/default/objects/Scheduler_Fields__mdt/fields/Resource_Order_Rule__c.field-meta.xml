@@ -3,7 +3,7 @@
     <fullName>Resource_Order_Rule__c</fullName>
     <defaultValue>&apos;Name ASC&apos;</defaultValue>
     <externalId>false</externalId>
-    <fieldManageability>DeveloperControlled</fieldManageability>
+    <fieldManageability>SubscriberControlled</fieldManageability>
     <label>Resource Order Rule</label>
     <required>false</required>
     <type>TextArea</type>

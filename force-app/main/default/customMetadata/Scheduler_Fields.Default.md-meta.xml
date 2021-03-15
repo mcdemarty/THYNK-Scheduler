@@ -79,6 +79,10 @@
         <value xsi:type="xsd:string">Name, Id, Bookable__c</value>
     </values>
     <values>
+        <field>Resource_Hidden_Columns_API_Fields__c</field>
+        <value xsi:type="xsd:string">Type__c, Parent_Resource__c</value>
+    </values>
+    <values>
         <field>Resource_Hotel_API_Name__c</field>
         <value xsi:nil="true"/>
     </values>

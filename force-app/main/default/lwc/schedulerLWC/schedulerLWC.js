@@ -1,12 +1,13 @@
 import { LightningElement, api } from 'lwc';
 import { loadScript, loadStyle } from "lightning/platformResourceLoader";
 import { ShowToastEvent } from 'lightning/platformShowToastEvent'
+import { NavigationMixin } from 'lightning/navigation';
 import getSchedulerData from '@salesforce/apex/SchedulerControllerV2.getSchedulerData';
 import saveEvent from '@salesforce/apex/SchedulerControllerV2.saveEvent';
 
 import SCHEDULER from '@salesforce/resourceUrl/Scheduler';
 
-export default class SchedulerLwc extends LightningElement {
+export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 	@api schedulerFieldsMetadataName;
 	@api eventCustomFilter;
@@ -39,7 +40,11 @@ export default class SchedulerLwc extends LightningElement {
 	savedStartDate;
 	savedEndDate;
 
+	minSelectableEndDate;
+	maxSelectableStartDate;
+
 	savedResourceColumnsFilters;
+	resourceColumnsFiltersChanged = false;
 
 	collapsedResources;
 
@@ -63,11 +68,13 @@ export default class SchedulerLwc extends LightningElement {
 			loadStyle(this, SCHEDULER + "/scheduler.stockholm.css")
 		])
 			.then(() => {
-				bryntum.schedulerpro.init(this.template);
+				setTimeout(() => {
+					bryntum.schedulerpro.init(this.template.querySelector('.scheduler-init-container'));
 
-				this.loadSchedulerState();
+					this.loadSchedulerState();
 
-				this.initScheduler();
+					this.initScheduler();
+				}, 0);
 			})
 			.catch(e => {
 				console.error(e);
@@ -101,6 +108,9 @@ export default class SchedulerLwc extends LightningElement {
 
 		this.customStartDate = schedulerPreset.startDate;
 		this.customEndDate = schedulerPreset.endDate;
+
+		this.minSelectableEndDate = this.startDate;
+		this.maxSelectableStartDate = this.endDate;
 
 		this.saveSchedulerState();
 
@@ -161,7 +171,6 @@ export default class SchedulerLwc extends LightningElement {
 				}
 
 				let schedulerOptions = {
-					appendTo: this.template.querySelector('.scheduler-container'),
 					minHeight: this.componentHeight,
 
 					enableEventAnimations: false,
@@ -175,7 +184,6 @@ export default class SchedulerLwc extends LightningElement {
 
 					features: {
 						tree: true,
-						eventContextMenu: false,
 						eventDragCreate: false,
 						contextMenu: false,
 						enableEventAnimations: false,
@@ -184,6 +192,48 @@ export default class SchedulerLwc extends LightningElement {
 						timeRanges: true,
 						filterBar: this.responsiveType !== 'Small' ? filterBarOptions : false,
 						stripe: true,
+
+						eventMenu: {
+							items: {
+								deleteEvent: false,
+								unassignEvent: false,
+
+								extraItem: {
+									text: 'Open Event',
+									onItem: ({eventRecord}) => {
+										this[NavigationMixin.Navigate]({
+											type: 'standard__recordPage',
+											attributes: {
+												recordId: eventRecord.id,
+												actionName: 'view'
+											}
+										});
+									}
+								}
+							}
+						},
+
+						timeAxisHeaderMenu: {
+							items: {
+								eventsFilter: false,
+								dateRange: {
+									menu: {
+										items: {
+											todayBtn: {
+												onItem: () => {
+													console.log('todayBtn');
+												}
+											},
+											startDateField: {
+												onItem: () => {
+													console.log('startDateField');
+												}
+											}
+										}
+									}
+								}
+							}
+						},
 
 						eventTooltip: {
 							template: (event) => {
@@ -212,16 +262,25 @@ export default class SchedulerLwc extends LightningElement {
 						eventResizeEnd: this.eventDropResizeHandler,
 						collapseNode: this.eventCollapsedExpandedHandler,
 						expandNode: this.eventCollapsedExpandedHandler,
-						eventClick: this.eventClickHandler
+						eventClick: this.eventClickHandler,
+						timeAxisChange: this.timeAxisChangeHandler
 					}
 				}
 
 				schedulerOptions = Object.assign(schedulerOptions, schedulerPreset);
 
-				this.template.querySelector('.scheduler-container').innerHTML = '';
-				this.template.querySelector('.b-float-root').innerHTML = '';
+				if (this.template.querySelector('.scheduler-container')) {
+					this.template.querySelector('.scheduler-container').innerHTML = '';
+				}
 
 				this.scheduler = new bryntum.schedulerpro.SchedulerPro(schedulerOptions);
+				this.scheduler.render(this.template.querySelector('.scheduler-container'));
+
+				setTimeout(() => {
+					if (this.template.querySelector('.b-float-root')) {
+						this.template.querySelector('.b-float-root').innerHTML = '';
+					}
+				}, 0);
 
 				if (this.enableColumnFiltering) {
 					this.attachResourceFilterChangeEvents();
@@ -246,15 +305,23 @@ export default class SchedulerLwc extends LightningElement {
 		state.startDate = new Date(this.customStartDate).toISOString();
 		state.endDate = new Date(this.customEndDate).toISOString();
 
-		state.resourceColumnsFilters = {};
+		if (!state.resourceColumnsFilters) {
+			state.resourceColumnsFilters = {};
+		}
 
-		Array.from(this.template.querySelectorAll('.b-grid-header .b-filter-bar-field-input')).map(filterInput => {
-			if (!filterInput.value) {
-				return;
-			}
+		if (!this.resourceColumnsFiltersChanged) {
+			state.resourceColumnsFilters = this.savedResourceColumnsFilters || {};
+		} else {
+			Array.from(this.template.querySelectorAll('.b-grid-header .b-filter-bar-field-input')).map(filterInput => {
+				if (!filterInput.value) {
+					return;
+				}
 
-			state.resourceColumnsFilters[filterInput.name] = filterInput.value;
-		});
+				state.resourceColumnsFilters[filterInput.name] = filterInput.value;
+			});
+		}
+
+		this.savedResourceColumnsFilters = state.resourceColumnsFilters;
 
 		window.localStorage.setItem(window.location + 'schedulerState', JSON.stringify(state));
 	}
@@ -273,7 +340,6 @@ export default class SchedulerLwc extends LightningElement {
 			this.savedStartDate = new Date(state.startDate);
 			this.savedEndDate = new Date(state.endDate);
 		}
-
 	}
 
 	saveColumnsWidth() {
@@ -481,6 +547,12 @@ export default class SchedulerLwc extends LightningElement {
 	}
 
 	startDateInputChangeHandler(event) {
+		if (!event.target.checkValidity()) {
+			event.target.value = this.startDate;
+
+			return;
+		}
+
 		this.currentViewPreset = this.VIEW_PRESET.CUSTOM;
 
 		this.customStartDate = new Date(event.target.value);
@@ -489,6 +561,12 @@ export default class SchedulerLwc extends LightningElement {
 	}
 
 	endDateInputChangeHandler(event) {
+		if (!event.target.checkValidity()) {
+			event.target.value = this.endDate;
+
+			return;
+		}
+
 		this.currentViewPreset = this.VIEW_PRESET.CUSTOM;
 
 		this.customEndDate = new Date(event.target.value);
@@ -555,6 +633,8 @@ export default class SchedulerLwc extends LightningElement {
 	attachResourceFilterChangeEvents() {
 		Array.from(this.template.querySelectorAll('.b-grid-header .b-filter-bar-field-input')).map(filterInput => {
 			filterInput.addEventListener('input', event => {
+				this.resourceColumnsFiltersChanged = true;
+
 				this.saveSchedulerState();
 			});
 		});
@@ -613,6 +693,23 @@ export default class SchedulerLwc extends LightningElement {
 		this.relatedComponent.template.querySelector('.scheduler-event-create-modal').showModal();
 	}
 
+	timeAxisChangeHandler(event) {
+		this.relatedComponent.currentViewPreset = this.relatedComponent.VIEW_PRESET.CUSTOM;
+
+		if (this.relatedComponent.updatePresetInterval) {
+			clearInterval(this.relatedComponent.updatePresetInterval);
+		}
+
+		this.relatedComponent.updatePresetInterval = setInterval(() => {
+			this.relatedComponent.savedStartDate = event.startDate;
+			this.relatedComponent.savedEndDate = event.endDate;
+
+			this.relatedComponent.initScheduler();
+
+			clearInterval(this.relatedComponent.updatePresetInterval);
+		}, 1000);
+	}
+
 	showErrorToast(message) {
 		this.dispatchEvent(new ShowToastEvent({
 			title: 'Error',
@@ -622,6 +719,10 @@ export default class SchedulerLwc extends LightningElement {
 	}
 
 	get viewPresetPicklistValue() {
+		if (!this.currentViewPreset) {
+			return this.VIEW_PRESET.WEEK.toString();
+		}
+
 		return this.currentViewPreset.toString();
 	}
 

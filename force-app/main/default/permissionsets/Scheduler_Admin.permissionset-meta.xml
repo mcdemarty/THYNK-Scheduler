@@ -40,6 +40,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>SP_Event__c.Style__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>SP_Resource_Opening_Hours__c.Days__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -112,4 +117,20 @@
         <object>SP_Resource__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
+    <tabSettings>
+        <tab>SP_Event__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>SP_Resource_Maintenance__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>SP_Resource__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>SP_Time_Range__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
 </PermissionSet>
