@@ -125,8 +125,6 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			.then(result => {
 				const extensibleResult = JSON.parse(JSON.stringify(result));
 
-				console.log(extensibleResult);
-
 				this.schedulerData = extensibleResult;
 
 				this.removeEmptyChildrenArrays(extensibleResult.resources);
@@ -203,35 +201,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 								extraItem: {
 									text: 'Open Event',
 									onItem: ({eventRecord}) => {
-										this[NavigationMixin.Navigate]({
-											type: 'standard__recordPage',
-											attributes: {
-												recordId: eventRecord.id,
-												actionName: 'view'
-											}
-										});
-									}
-								}
-							}
-						},
-
-						timeAxisHeaderMenu: {
-							items: {
-								eventsFilter: false,
-								dateRange: {
-									menu: {
-										items: {
-											todayBtn: {
-												onItem: () => {
-													console.log('todayBtn');
-												}
-											},
-											startDateField: {
-												onItem: () => {
-													console.log('startDateField');
-												}
-											}
-										}
+										window.open(window.location.origin + '/' + eventRecord.formulaId || eventRecord.id, '_blank');
 									}
 								}
 							}

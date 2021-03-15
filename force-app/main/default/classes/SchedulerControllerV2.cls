@@ -205,7 +205,8 @@ public without sharing class SchedulerControllerV2 {
 			schedulerFields.Event_Parent_Resource_API_Field__c,
 			schedulerFields.Event_Color_API_Field__c,
 			schedulerFields.Event_Icon_API_Field__c,
-			schedulerFields.Event_Style_API_Field__c
+			schedulerFields.Event_Style_API_Field__c,
+			schedulerFields.Event_Id_API_Field__c
 		};
 
 		if (String.isNotEmpty(schedulerFields.Event_Tooltip_Fields__c)) {
@@ -487,6 +488,8 @@ public without sharing class SchedulerControllerV2 {
 		@AuraEnabled
 		public Id id;
 		@AuraEnabled
+		public String formulaId;
+		@AuraEnabled
 		public Datetime startDate;
 		@AuraEnabled
 		public Datetime endDate;
@@ -505,6 +508,7 @@ public without sharing class SchedulerControllerV2 {
 
 		public SchedulerEvent(SObject event, Scheduler_Fields__mdt schedulerFields) {
 			id = event.Id;
+			formulaId = String.valueOf(getSafeFieldValue(schedulerFields.Event_Id_API_Field__c, event));
 			startDate = Datetime.valueOf(getSafeFieldValue(schedulerFields.Event_Start_Date_API_Field__c, event));
 			endDate = Datetime.valueOf(getSafeFieldValue(schedulerFields.Event_End_Date_API_Field__c, event));
 			name = String.valueOf(getSafeFieldValue(schedulerFields.Event_Name_API_Field__c, event));

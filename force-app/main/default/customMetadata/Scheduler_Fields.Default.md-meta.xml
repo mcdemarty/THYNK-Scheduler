@@ -31,6 +31,10 @@
         <value xsi:type="xsd:string">b-fa b-fa-calendar-day</value>
     </values>
     <values>
+        <field>Event_Id_API_Field__c</field>
+        <value xsi:type="xsd:string">Id</value>
+    </values>
+    <values>
         <field>Event_Name_API_Field__c</field>
         <value xsi:type="xsd:string">Name</value>
     </values>
