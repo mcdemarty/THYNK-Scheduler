@@ -82,7 +82,7 @@ public without sharing class SchedulerControllerV2 {
 			schedulerFields.Resource_API_Name__c
 		}));
 
-		return Boolean.valueOf(resources[0].get(schedulerFields.Resource_Bookable_API_Field__c));
+		return Boolean.valueOf(getSafeFieldValue(schedulerFields.Resource_Bookable_API_Field__c, resources[0]));
 	}
 
 	private static List<SchedulerResource> getResources(String fieldMappingMetadataName, String resourceCustomFilter, String resourceOrderRule) {
@@ -108,16 +108,8 @@ public without sharing class SchedulerControllerV2 {
 			throw new SchedulerFieldMappingException('Resource object ' + schedulerFields.Resource_API_Name__c + ' not found');
 		}
 
-		Map<String, SObjectField> resourceObjectFields = schemaGlobalDescribeResult.get(schedulerFields.Resource_API_Name__c).getDescribe().fields.getMap();
-
 		for (String field : fieldsToRetrieve) {
-			if (!resourceObjectFields.containsKey(field)) {
-				throw new SchedulerFieldMappingException('Field ' + field + ' not found on ' + schedulerFields.Resource_API_Name__c + ' object');
-			}
-
-			if (!resourceObjectFields.get(field).getDescribe().isAccessible()) {
-				throw new SchedulerFieldMappingException('Not enough access to a field ' + field + ' on ' + schedulerFields.Resource_API_Name__c + ' object');
-			}
+			checkFieldValidity(field, schemaGlobalDescribeResult.get(schedulerFields.Resource_API_Name__c));
 		}
 
 		String query = 'SELECT ' + String.join(new List<String>(fieldsToRetrieve), ',') + ' FROM ' + schedulerFields.Resource_API_Name__c;
@@ -162,28 +154,25 @@ public without sharing class SchedulerControllerV2 {
 
 		List<ResourceColumn> columns = new List<ResourceColumn>();
 
-		List<String> fields = schedulerFields.Resource_Display_Columns_API_Fields__c.toLowerCase().split(',');
-		List<String> hiddenFields = schedulerFields.Resource_Hidden_Columns_API_Fields__c.toLowerCase().split(',');
+		List<String> fields = schedulerFields.Resource_Display_Columns_API_Fields__c.split(',');
+		List<String> hiddenFields = schedulerFields.Resource_Hidden_Columns_API_Fields__c.split(',');
 
 		if (fields.isEmpty()) {
 			return columns;
 		}
 
+		SObjectType resourceObjectType = Schema.getGlobalDescribe().get(schedulerFields.Resource_API_Name__c);
 		Map<String, SObjectField> fieldsDescribeSource = Schema.getGlobalDescribe().get(schedulerFields.Resource_API_Name__c).getDescribe().fields.getMap();
 
 		for (String field : fields) {
 			String trimmedField = field.trim();
 
-			if (!fieldsDescribeSource.containsKey(trimmedField)) {
-				throw new SchedulerFieldMappingException('Field ' + trimmedField + ' not found');
-			}
-
-			DescribeFieldResult describeFieldResult = fieldsDescribeSource.get(trimmedField).getDescribe();
+			DescribeFieldResult describeFieldResult = checkFieldValidity(trimmedField, resourceObjectType).getDescribe();
 
 			ResourceColumn resourceColumn = new ResourceColumn();
 
 			resourceColumn.text = describeFieldResult.getLabel();
-			resourceColumn.field = describeFieldResult.getName();
+			resourceColumn.field = trimmedField;
 			resourceColumn.hidden = false;
 
 			columns.add(resourceColumn);
@@ -192,16 +181,12 @@ public without sharing class SchedulerControllerV2 {
 		for (String field : hiddenFields) {
 			String trimmedField = field.trim();
 
-			if (!fieldsDescribeSource.containsKey(trimmedField)) {
-				throw new SchedulerFieldMappingException('Field ' + trimmedField + ' not found');
-			}
-
-			DescribeFieldResult describeFieldResult = fieldsDescribeSource.get(trimmedField).getDescribe();
+			DescribeFieldResult describeFieldResult = checkFieldValidity(trimmedField, resourceObjectType).getDescribe();
 
 			ResourceColumn resourceColumn = new ResourceColumn();
 
 			resourceColumn.text = describeFieldResult.getLabel();
-			resourceColumn.field = describeFieldResult.getName();
+			resourceColumn.field = trimmedField;
 			resourceColumn.hidden = true;
 
 			columns.add(resourceColumn);
@@ -220,7 +205,8 @@ public without sharing class SchedulerControllerV2 {
 			schedulerFields.Event_Parent_Resource_API_Field__c,
 			schedulerFields.Event_Color_API_Field__c,
 			schedulerFields.Event_Icon_API_Field__c,
-			schedulerFields.Event_Style_API_Field__c
+			schedulerFields.Event_Style_API_Field__c,
+			schedulerFields.Event_Id_API_Field__c
 		};
 
 		if (String.isNotEmpty(schedulerFields.Event_Tooltip_Fields__c)) {
@@ -233,16 +219,8 @@ public without sharing class SchedulerControllerV2 {
 			throw new SchedulerFieldMappingException('Event object ' + schedulerFields.Event_API_Name__c + ' not found');
 		}
 
-		Map<String, SObjectField> eventObjectFields = schemaGlobalDescribeResult.get(schedulerFields.Event_API_Name__c).getDescribe().fields.getMap();
-
 		for (String field : fieldsToRetrieve) {
-			if (!eventObjectFields.containsKey(field)) {
-				throw new SchedulerFieldMappingException('Field ' + field + ' not found on ' + schedulerFields.Event_API_Name__c + ' object');
-			}
-
-			if (!eventObjectFields.get(field).getDescribe().isAccessible()) {
-				throw new SchedulerFieldMappingException('Not enough access to a field ' + field + ' on ' + schedulerFields.Event_API_Name__c + ' object');
-			}
+			checkFieldValidity(field, schemaGlobalDescribeResult.get(schedulerFields.Event_API_Name__c));
 		}
 
 		String query = 'SELECT ' + String.join(new List<String>(fieldsToRetrieve), ',') + ' FROM ' + schedulerFields.Event_API_Name__c + ' WHERE ';
@@ -369,6 +347,80 @@ public without sharing class SchedulerControllerV2 {
 		return (SchedulerControllerV2.class.getName().contains('.') ? SchedulerControllerV2.class.getName().substringBefore('.') + '__' : '') + name;
 	}
 
+	private static SObjectField checkFieldValidity(String fieldPath, SObjectType sObjectType) {
+		if (!fieldPath.contains('.')) {
+			if (sObjectType.getDescribe().fields.getMap().containsKey(fieldPath)) {
+				if (sObjectType.getDescribe().fields.getMap().get(fieldPath).getDescribe().isAccessible()) {
+					return sObjectType.getDescribe().fields.getMap().get(fieldPath);
+				} else {
+					throw new SchedulerFieldMappingException('Not enough access to ' + fieldPath + ' field on ' + sObjectType.getDescribe().getName() + ' object.');
+				}
+			} else {
+				throw new SchedulerFieldMappingException('Field ' + fieldPath + ' not found on ' + sObjectType.getDescribe().getName() + ' object.');
+			}
+		} else {
+			SObjectType currentSObjectType = sObjectType;
+
+			for (String pathItem : fieldPath.split('\\.')) {
+				DescribeSObjectResult sObjectTypeDescribeResult = currentSObjectType.getDescribe();
+
+				if (pathItem.toLowerCase().contains('__r')) {
+					pathItem = pathItem.toLowerCase().replace('__r', '__c');
+				}
+
+				if (sObjectTypeDescribeResult.fields.getMap().containsKey(pathItem + 'Id')) {
+					pathItem = pathItem + 'Id';
+				}
+
+				if (!sObjectTypeDescribeResult.fields.getMap().containsKey(pathItem)) {
+					throw new SchedulerFieldMappingException('Field ' + pathItem + ' not found on ' + sObjectTypeDescribeResult.getName() + ' object.');
+				}
+
+				if (!sObjectTypeDescribeResult.fields.getMap().get(pathItem).getDescribe().isAccessible()) {
+					throw new SchedulerFieldMappingException('Not enough access to ' + pathItem + ' field on ' + sObjectTypeDescribeResult.getName() + ' object.');
+				}
+
+				if (sObjectTypeDescribeResult.fields.getMap().get(pathItem).getDescribe().getReferenceTo().isEmpty()) {
+					return sObjectTypeDescribeResult.fields.getMap().get(pathItem);
+				} else {
+					currentSObjectType = sObjectTypeDescribeResult.fields.getMap().get(pathItem).getDescribe().getReferenceTo()[0];
+				}
+			}
+
+			return null;
+		}
+	}
+
+	private static Object getSafeFieldValue(String fieldPath, SObject parentObject) {
+		if (!fieldPath.contains('.')) {
+			return parentObject.get(fieldPath);
+		} else {
+			SObject currentSObject = parentObject;
+
+			for (String pathItem : fieldPath.split('\\.')) {
+				if (currentSObject == null) {
+					return null;
+				}
+
+				if (pathItem.toLowerCase().contains('__r')) {
+					currentSObject = currentSObject.getSObject(pathItem.toLowerCase().replace('__r', '__c'));
+
+					continue;
+				}
+
+				if (currentSObject.getSObjectType().getDescribe().fields.getMap().containsKey(pathItem + 'Id')) {
+					currentSObject = currentSObject.getSObject(pathItem);
+
+					continue;
+				}
+
+				return currentSObject.get(pathItem);
+			}
+		}
+
+		return null;
+	}
+
 	public class SchedulerData {
 		@AuraEnabled
 		public List<SchedulerResource> resources = new List<SchedulerResource>();
@@ -416,14 +468,14 @@ public without sharing class SchedulerControllerV2 {
 
 		public SchedulerResource(SObject resource, Scheduler_Fields__mdt schedulerFields) {
 			id = resource.Id;
-			name = String.valueOf(resource.get(schedulerFields.Event_Name_API_Field__c));
+			name = String.valueOf(getSafeFieldValue(schedulerFields.Resource_Name_API_Field__c, resource));
 
-			if (resource.get(schedulerFields.Resource_Parent_Resource_API_Field__c) != null) {
-				parentResource = String.valueOf(resource.get(schedulerFields.Resource_Parent_Resource_API_Field__c));
+			if (getSafeFieldValue(schedulerFields.Resource_Parent_Resource_API_Field__c, resource) != null) {
+				parentResource = String.valueOf(getSafeFieldValue(schedulerFields.Resource_Parent_Resource_API_Field__c, resource));
 			}
 
-			if (resource.get(schedulerFields.Resource_Icon_API_Field__c) != null) {
-				iconCls = String.valueOf(resource.get(schedulerFields.Resource_Icon_API_Field__c));
+			if (getSafeFieldValue(schedulerFields.Resource_Icon_API_Field__c, resource) != null) {
+				iconCls = String.valueOf(getSafeFieldValue(schedulerFields.Resource_Icon_API_Field__c, resource));
 			} else {
 				iconCls = schedulerFields.Resource_Icon__c;
 			}
@@ -435,6 +487,8 @@ public without sharing class SchedulerControllerV2 {
 	public class SchedulerEvent {
 		@AuraEnabled
 		public Id id;
+		@AuraEnabled
+		public String formulaId;
 		@AuraEnabled
 		public Datetime startDate;
 		@AuraEnabled
@@ -454,25 +508,26 @@ public without sharing class SchedulerControllerV2 {
 
 		public SchedulerEvent(SObject event, Scheduler_Fields__mdt schedulerFields) {
 			id = event.Id;
-			startDate = Datetime.valueOf(event.get(schedulerFields.Event_Start_Date_API_Field__c));
-			endDate = Datetime.valueOf(event.get(schedulerFields.Event_End_Date_API_Field__c));
-			name = String.valueOf(event.get(schedulerFields.Event_Name_API_Field__c));
-			resourceId = String.valueOf(event.get(schedulerFields.Event_Parent_Resource_API_Field__c));
+			formulaId = String.valueOf(getSafeFieldValue(schedulerFields.Event_Id_API_Field__c, event));
+			startDate = Datetime.valueOf(getSafeFieldValue(schedulerFields.Event_Start_Date_API_Field__c, event));
+			endDate = Datetime.valueOf(getSafeFieldValue(schedulerFields.Event_End_Date_API_Field__c, event));
+			name = String.valueOf(getSafeFieldValue(schedulerFields.Event_Name_API_Field__c, event));
+			resourceId = String.valueOf(getSafeFieldValue(schedulerFields.Event_Parent_Resource_API_Field__c, event));
 
-			if (event.get(schedulerFields.Event_Color_API_Field__c) != null) {
-				eventColor = String.valueOf(event.get(schedulerFields.Event_Color_API_Field__c));
+			if (getSafeFieldValue(schedulerFields.Event_Color_API_Field__c, event) != null) {
+				eventColor = String.valueOf(getSafeFieldValue(schedulerFields.Event_Color_API_Field__c, event));
 			} else {
 				eventColor = schedulerFields.Event_Color__c;
 			}
 
-			if (event.get(schedulerFields.Event_Icon_API_Field__c) != null) {
-				iconCls = String.valueOf(event.get(schedulerFields.Event_Icon_API_Field__c));
+			if (getSafeFieldValue(schedulerFields.Event_Icon_API_Field__c, event) != null) {
+				iconCls = String.valueOf(getSafeFieldValue(schedulerFields.Event_Icon_API_Field__c, event));
 			} else {
 				iconCls = schedulerFields.Event_Icon__c;
 			}
 
-			if (event.get(schedulerFields.Event_Style_API_Field__c) != null) {
-				eventStyle = String.valueOf(event.get(schedulerFields.Event_Style_API_Field__c)).toLowerCase();
+			if (getSafeFieldValue(schedulerFields.Event_Style_API_Field__c, event) != null) {
+				eventStyle = String.valueOf(getSafeFieldValue(schedulerFields.Event_Style_API_Field__c, event)).toLowerCase();
 			} else {
 				eventStyle = 'plain';
 			}

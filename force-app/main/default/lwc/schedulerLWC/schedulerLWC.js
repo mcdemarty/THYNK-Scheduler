@@ -201,35 +201,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 								extraItem: {
 									text: 'Open Event',
 									onItem: ({eventRecord}) => {
-										this[NavigationMixin.Navigate]({
-											type: 'standard__recordPage',
-											attributes: {
-												recordId: eventRecord.id,
-												actionName: 'view'
-											}
-										});
-									}
-								}
-							}
-						},
-
-						timeAxisHeaderMenu: {
-							items: {
-								eventsFilter: false,
-								dateRange: {
-									menu: {
-										items: {
-											todayBtn: {
-												onItem: () => {
-													console.log('todayBtn');
-												}
-											},
-											startDateField: {
-												onItem: () => {
-													console.log('startDateField');
-												}
-											}
-										}
+										window.open(window.location.origin + '/' + eventRecord.formulaId || eventRecord.id, '_blank');
 									}
 								}
 							}
@@ -240,7 +212,23 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 								let template = '';
 
 								this.schedulerData.eventTooltipFields.map(field => {
-									template += `<div>${event.eventRecord[field]}</div>`;
+									let value = event.eventRecord[field];
+									let currentObjectLevel = event.eventRecord;
+
+									if (field.includes('.')) {
+										const fieldParts = field.split('.');
+										let i = 0;
+
+										while (typeof currentObjectLevel === 'object' && currentObjectLevel != null) {
+											currentObjectLevel = currentObjectLevel[fieldParts[i]];
+
+											i++;
+										}
+
+										value = currentObjectLevel;
+									}
+
+									template += `<div>${value}</div>`;
 								});
 
 								return template;
