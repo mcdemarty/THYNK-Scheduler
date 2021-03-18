@@ -126,8 +126,6 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			.then(result => {
 				const extensibleResult = JSON.parse(JSON.stringify(result));
 
-				console.log(extensibleResult);
-
 				this.schedulerData = extensibleResult;
 
 				this.removeEmptyChildrenArrays(extensibleResult.resources);
@@ -275,6 +273,14 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 					if (this.template.querySelector('.b-float-root')) {
 						this.template.querySelector('.b-float-root').innerHTML = '';
 					}
+
+					if (this.template.querySelector('.b-grid-headers')) {
+						this.template.querySelector('.b-grid-headers').addEventListener('click', () => {
+							this.resourceColumnsFiltersChanged = true;
+
+							this.saveSchedulerState();
+						})
+					}
 				}, 0);
 
 				if (this.enableColumnFiltering) {
@@ -309,6 +315,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		} else {
 			Array.from(this.template.querySelectorAll('.b-grid-header .b-filter-bar-field-input')).map(filterInput => {
 				if (!filterInput.value) {
+					delete state.resourceColumnsFilters[filterInput.name];
+
 					return;
 				}
 
