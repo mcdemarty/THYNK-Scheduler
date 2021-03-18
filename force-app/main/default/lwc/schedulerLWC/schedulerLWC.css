@@ -38,3 +38,8 @@
     top: 11px;
     cursor: pointer;
 }
+
+.b-filter-bar-field .b-field-inner {
+    height: 28px;
+    border-radius: 0.25rem;
+}
