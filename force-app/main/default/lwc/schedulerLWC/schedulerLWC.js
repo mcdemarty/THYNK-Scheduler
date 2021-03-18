@@ -194,6 +194,12 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 						filterBar: this.responsiveType !== 'Small' ? filterBarOptions : false,
 						stripe: true,
 
+						timeAxisHeaderMenu: {
+							items: {
+								eventsFilter: false
+							}
+						},
+
 						eventMenu: {
 							items: {
 								deleteEvent: false,
@@ -704,12 +710,12 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		}
 
 		this.relatedComponent.updatePresetInterval = setInterval(() => {
-			this.relatedComponent.savedStartDate = event.startDate;
-			this.relatedComponent.savedEndDate = event.endDate;
-
-			this.relatedComponent.initScheduler();
-
 			clearInterval(this.relatedComponent.updatePresetInterval);
+
+			this.relatedComponent.customStartDate = event.config.startDate;
+			this.relatedComponent.customEndDate = event.config.endDate;
+
+			this.relatedComponent.initScheduler(true);
 		}, 1000);
 	}
 
