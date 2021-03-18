@@ -18,6 +18,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	@api eventLayoutType;
 	@api enableColumnFiltering;
 	@api responsiveType;
+	@api showFieldNamesWhenHovered;
 
 	VIEW_PRESET = {
 		DAY: 1,
@@ -125,6 +126,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			.then(result => {
 				const extensibleResult = JSON.parse(JSON.stringify(result));
 
+				console.log(extensibleResult);
+
 				this.schedulerData = extensibleResult;
 
 				this.removeEmptyChildrenArrays(extensibleResult.resources);
@@ -226,6 +229,10 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 										}
 
 										value = currentObjectLevel;
+									}
+
+									if (this.showFieldNamesWhenHovered) {
+										value = extensibleResult.eventTooltipFieldsNames[field] + ': ' + value;
 									}
 
 									template += `<div>${value}</div>`;
