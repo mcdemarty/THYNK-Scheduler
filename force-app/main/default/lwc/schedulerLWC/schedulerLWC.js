@@ -20,6 +20,18 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	@api responsiveType;
 	@api showFieldNamesWhenHovered;
 
+	// Style attributes
+
+	@api headingFont;
+	@api headingFontSize;
+	@api headingFontColor;
+	@api headingAlignment;
+
+	@api resourceHeadingFont;
+	@api resourceHeadingFontSize;
+	@api resourceHeadingFontColor;
+	@api resourceHeadingAlignment;
+
 	VIEW_PRESET = {
 		DAY: 1,
 		WEEK: 2,
@@ -71,6 +83,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			.then(() => {
 				setTimeout(() => {
 					bryntum.schedulerpro.init(this.template.querySelector('.scheduler-init-container'));
+
+					this.initializeCustomSchedulerStyle();
 
 					this.loadSchedulerState();
 
@@ -368,6 +382,37 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 	getSavedColumnsWidth() {
 		return JSON.parse(window.localStorage.getItem(window.location + 'schedulerColumnsWidth')) || [];
+	}
+
+	initializeCustomSchedulerStyle() {
+		const customClassName = 'scheduler-' + Math.random().toString().substring(2);
+
+		this.template.querySelector('.scheduler-init-container').classList.add(customClassName);
+
+		const styleNode = document.createElement('style');
+
+		styleNode.innerHTML = `.${customClassName} .b-grid-header-text-content {
+			${this.headingFont ? 'font-family: ' + this.headingFont + ' !important;' : ''}
+			${this.headingFontSize ? 'font-size: ' + this.headingFontSize + ' !important;' : ''}
+			${this.headingFontColor ? 'color: ' + this.headingFontColor + ' !important;' : ''}
+			${this.headingAlignment ? 'text-align: ' + this.headingAlignment + ' !important;' : ''}
+		} `;
+
+		const alignToFlex = {
+			'Left': 'flex-start',
+			'Center': 'center',
+			'Right': 'flex-end'
+		}
+
+		styleNode.innerHTML += `.${customClassName} .b-tree-cell-value, .${customClassName} .b-grid-cell {
+			${this.resourceHeadingFont ? 'font-family: ' + this.resourceHeadingFont + ' !important;' : ''}
+			${this.resourceHeadingFontSize ? 'font-size: ' + this.resourceHeadingFontSize + ' !important;' : ''}
+			${this.resourceHeadingFontColor ? 'color: ' + this.resourceHeadingFontColor + ' !important;' : ''}
+			${this.resourceHeadingAlignment ? 'text-align: ' + this.resourceHeadingAlignment + ' !important;' : ''}
+			${this.resourceHeadingAlignment ? 'justify-content: ' + alignToFlex[this.resourceHeadingAlignment] + ' !important;' : ''}
+		} `;
+
+		this.template.querySelector('.scheduler-init-container').appendChild(styleNode);
 	}
 
 	// Preset functions
