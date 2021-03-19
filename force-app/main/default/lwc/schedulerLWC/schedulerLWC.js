@@ -18,6 +18,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	@api eventLayoutType;
 	@api enableColumnFiltering;
 	@api responsiveType;
+	@api showFieldNamesWhenHovered;
 
 	VIEW_PRESET = {
 		DAY: 1,
@@ -193,6 +194,12 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 						filterBar: this.responsiveType !== 'Small' ? filterBarOptions : false,
 						stripe: true,
 
+						timeAxisHeaderMenu: {
+							items: {
+								eventsFilter: false
+							}
+						},
+
 						eventMenu: {
 							items: {
 								deleteEvent: false,
@@ -226,6 +233,10 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 										}
 
 										value = currentObjectLevel;
+									}
+
+									if (this.showFieldNamesWhenHovered) {
+										value = extensibleResult.eventTooltipFieldsNames[field] + ': ' + value;
 									}
 
 									template += `<div>${value}</div>`;
@@ -268,6 +279,14 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 					if (this.template.querySelector('.b-float-root')) {
 						this.template.querySelector('.b-float-root').innerHTML = '';
 					}
+
+					if (this.template.querySelector('.b-grid-headers')) {
+						this.template.querySelector('.b-grid-headers').addEventListener('click', () => {
+							this.resourceColumnsFiltersChanged = true;
+
+							this.saveSchedulerState();
+						})
+					}
 				}, 0);
 
 				if (this.enableColumnFiltering) {
@@ -302,6 +321,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		} else {
 			Array.from(this.template.querySelectorAll('.b-grid-header .b-filter-bar-field-input')).map(filterInput => {
 				if (!filterInput.value) {
+					delete state.resourceColumnsFilters[filterInput.name];
+
 					return;
 				}
 
@@ -689,12 +710,12 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		}
 
 		this.relatedComponent.updatePresetInterval = setInterval(() => {
-			this.relatedComponent.savedStartDate = event.startDate;
-			this.relatedComponent.savedEndDate = event.endDate;
-
-			this.relatedComponent.initScheduler();
-
 			clearInterval(this.relatedComponent.updatePresetInterval);
+
+			this.relatedComponent.customStartDate = event.config.startDate;
+			this.relatedComponent.customEndDate = event.config.endDate;
+
+			this.relatedComponent.initScheduler(true);
 		}, 1000);
 	}
 

@@ -38,6 +38,14 @@ public without sharing class SchedulerControllerV2 {
 		schedulerData.maintenanceTimeRanges = getMaintenanceTimeRanges(fieldMappingMetadataName, startDate, endDate, resources);
 		schedulerData.timeRanges = getTimeRanges(fieldMappingMetadataName, startDate, endDate);
 
+		if (String.isNotEmpty(schedulerFields.Event_Tooltip_Fields__c)) {
+			SObjectType eventObjectType = Schema.getGlobalDescribe().get(schedulerFields.Event_API_Name__c);
+
+			for (String field : schedulerFields.Event_Tooltip_Fields__c.replaceAll(' ', '').split(',')) {
+				schedulerData.eventTooltipFieldsNames.put(field, checkFieldValidity(field, eventObjectType).getDescribe().getLabel());
+			}
+		}
+
 		return schedulerData;
 	}
 
@@ -444,6 +452,8 @@ public without sharing class SchedulerControllerV2 {
 		public String eventStartDateFieldAPIName;
 		@AuraEnabled
 		public String eventEndDateFieldAPIName;
+		@AuraEnabled
+		public Map<String, String> eventTooltipFieldsNames = new Map<String, String>();
 	}
 
 	public class SchedulerResource {
