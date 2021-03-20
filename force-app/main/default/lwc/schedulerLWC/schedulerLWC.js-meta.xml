@@ -26,6 +26,8 @@
             
             <property name="schedulerFieldsMetadataName" type="String" label="Field Metadata Name"/>
             
+            <property name="secondSchedulerFieldsMetadataName" type="String" label="Second Instance Field Metadata Name"/>
+            
             <property name="eventCustomFilter" type="String" label="Event Custom Filter"/>
             
             <property name="resourceCustomFilter" type="String" label="Resource Custom Filter"/>
