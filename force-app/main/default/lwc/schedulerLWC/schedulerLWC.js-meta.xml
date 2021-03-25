@@ -26,6 +26,8 @@
             
             <property name="schedulerFieldsMetadataName" type="String" label="Field Metadata Name"/>
             
+            <property name="secondSchedulerFieldsMetadataName" type="String" label="Second Instance Field Metadata Name"/>
+            
             <property name="eventCustomFilter" type="String" label="Event Custom Filter"/>
             
             <property name="resourceCustomFilter" type="String" label="Resource Custom Filter"/>
@@ -43,6 +45,24 @@
             <property name="enableColumnFiltering" type="Boolean" label="Event Column Filtering"/>
             
             <property name="showFieldNamesWhenHovered" type="Boolean" label="Show Field Names when an Event hovered"/>
+            
+
+            <property name="headingFont" type="String" label="Heading Font"/>
+            
+            <property name="headingFontSize" type="String" label="Heading Font Size" default="16px"/>
+            
+            <property name="headingFontColor" type="String" label="Heading Font Color" default="black"/>
+            
+            <property name="headingAlignment" type="String" label="Heading Alignment" datasource="Left,Center,Right"/>
+            
+
+            <property name="resourceHeadingFont" type="String" label="Resource Heading Font"/>
+            
+            <property name="resourceHeadingFontSize" type="String" label="Resource Heading Font Size" default="16px"/>
+            
+            <property name="resourceHeadingFontColor" type="String" label="Resource Heading Font Color" default="black"/>
+            
+            <property name="resourceHeadingAlignment" type="String" label="Resource Heading Alignment" datasource="Left,Center,Right"/>
             
         </targetConfig>
         

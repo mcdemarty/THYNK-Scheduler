@@ -10,6 +10,7 @@ import SCHEDULER from '@salesforce/resourceUrl/Scheduler';
 export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 	@api schedulerFieldsMetadataName;
+	@api secondSchedulerFieldsMetadataName;
 	@api eventCustomFilter;
 	@api resourceCustomFilter;
 	@api resourceOrderRule;
@@ -20,6 +21,18 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	@api responsiveType;
 	@api showFieldNamesWhenHovered;
 
+	// Style attributes
+
+	@api headingFont;
+	@api headingFontSize;
+	@api headingFontColor;
+	@api headingAlignment;
+
+	@api resourceHeadingFont;
+	@api resourceHeadingFontSize;
+	@api resourceHeadingFontColor;
+	@api resourceHeadingAlignment;
+
 	VIEW_PRESET = {
 		DAY: 1,
 		WEEK: 2,
@@ -29,8 +42,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 	currentViewPreset = this.VIEW_PRESET.WEEK;
 
-	scheduler;
-	schedulerData;
+	schedulers = [];
 
 	startDate;
 	endDate;
@@ -71,6 +83,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			.then(() => {
 				setTimeout(() => {
 					bryntum.schedulerpro.init(this.template.querySelector('.scheduler-init-container'));
+
+					this.initializeCustomSchedulerStyle();
 
 					this.loadSchedulerState();
 
@@ -115,185 +129,205 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 		this.saveSchedulerState();
 
-		getSchedulerData({
-			fieldMappingMetadataName: this.schedulerFieldsMetadataName,
-			startDate: schedulerPreset.startDate.toISOString(),
-			endDate: schedulerPreset.endDate.toISOString(),
-			eventCustomFilter: this.eventCustomFilter,
-			resourceCustomFilter: this.resourceCustomFilter,
-			resourceOrderRule: this.resourceOrderRule
-		})
-			.then(result => {
-				const extensibleResult = JSON.parse(JSON.stringify(result));
+		const getDataPromises = [
+			getSchedulerData({
+				fieldMappingMetadataName: this.schedulerFieldsMetadataName,
+				startDate: schedulerPreset.startDate.toISOString(),
+				endDate: schedulerPreset.endDate.toISOString(),
+				eventCustomFilter: this.eventCustomFilter,
+				resourceCustomFilter: this.resourceCustomFilter,
+				resourceOrderRule: this.resourceOrderRule
+			})
+		];
 
-				this.schedulerData = extensibleResult;
+		if (this.secondSchedulerFieldsMetadataName) {
+			getDataPromises.push(getSchedulerData({
+				fieldMappingMetadataName: this.secondSchedulerFieldsMetadataName,
+				startDate: schedulerPreset.startDate.toISOString(),
+				endDate: schedulerPreset.endDate.toISOString(),
+				eventCustomFilter: this.eventCustomFilter,
+				resourceCustomFilter: this.resourceCustomFilter,
+				resourceOrderRule: this.resourceOrderRule
+			}));
+		}
 
-				this.removeEmptyChildrenArrays(extensibleResult.resources);
-
-				const resourceStore = new bryntum.schedulerpro.ResourceStore({
-					tree: true,
-					data: this.collapseResourcesFromState(this.mergeResourceRecords(extensibleResult.resources))
-				});
-
-				const eventStore = new bryntum.schedulerpro.EventStore({
-					data: this.mergeEventRecords(extensibleResult.events)
-				});
-
-				const maintenanceTimeRanges = extensibleResult.maintenanceTimeRanges;
-				maintenanceTimeRanges.map(timeRange => {
-					timeRange.style = 'background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2) 10px, rgba(190, 190, 190, 0.2) 10px, rgba(190, 190, 190, 0.2) 20px) rgba(255, 255, 255, 0); color: #888;';
-				});
-
-				const columns = extensibleResult.resourceColumns;
-				const columnsWidth = this.getSavedColumnsWidth();
-
-				for (let i = 0; i < columnsWidth.length; i++) {
-					columns[i].width = columnsWidth[i];
-				}
-
-				extensibleResult.resourceColumns[0].type = 'tree';
-
-				let filterBarOptions = this.enableColumnFiltering || false;
-				if (filterBarOptions) {
-					const filter = [];
-
-					if (this.savedResourceColumnsFilters) {
-						Object.keys(this.savedResourceColumnsFilters).map(filterKey => {
-							filter.push({
-								property: filterKey,
-								value: this.savedResourceColumnsFilters[filterKey]
-							})
-						});
-					}
-
-					filterBarOptions = {
-						filter: filter
-					}
-				}
-
-				let schedulerOptions = {
-					minHeight: this.componentHeight,
-
-					enableEventAnimations: false,
-					createEventOnDblClick: false,
-
-					viewPreset : {},
-
-					eventLayout: this.eventLayoutType || 'stack',
-
-					fillTicks: this.responsiveType === 'Small',
-
-					features: {
-						tree: true,
-						eventDragCreate: false,
-						contextMenu: false,
-						enableEventAnimations: false,
-						dependencies: false,
-						resourceTimeRanges: true,
-						timeRanges: true,
-						filterBar: this.responsiveType !== 'Small' ? filterBarOptions : false,
-						stripe: true,
-
-						timeAxisHeaderMenu: {
-							items: {
-								eventsFilter: false
-							}
-						},
-
-						eventMenu: {
-							items: {
-								deleteEvent: false,
-								unassignEvent: false,
-
-								extraItem: {
-									text: 'Open Event',
-									onItem: ({eventRecord}) => {
-										window.open(window.location.origin + '/' + eventRecord.formulaId || eventRecord.id, '_blank');
-									}
-								}
-							}
-						},
-
-						eventTooltip: {
-							template: (event) => {
-								let template = '';
-
-								this.schedulerData.eventTooltipFields.map(field => {
-									let value = event.eventRecord[field];
-									let currentObjectLevel = event.eventRecord;
-
-									if (field.includes('.')) {
-										const fieldParts = field.split('.');
-										let i = 0;
-
-										while (typeof currentObjectLevel === 'object' && currentObjectLevel != null) {
-											currentObjectLevel = currentObjectLevel[fieldParts[i]];
-
-											i++;
-										}
-
-										value = currentObjectLevel;
-									}
-
-									if (this.showFieldNamesWhenHovered) {
-										value = extensibleResult.eventTooltipFieldsNames[field] + ': ' + value;
-									}
-
-									template += `<div>${value}</div>`;
-								});
-
-								return template;
-							}
-						}
-					},
-
-					columns: columns,
-
-					barMargin: parseInt(this.eventMargin) || 0,
-
-					resourceStore: resourceStore,
-					eventStore: eventStore,
-					resourceTimeRanges: [].concat(maintenanceTimeRanges),
-					timeRanges: [].concat(extensibleResult.timeRanges),
-
-					listeners: {
-						eventDrop: this.eventDropResizeHandler,
-						eventResizeEnd: this.eventDropResizeHandler,
-						collapseNode: this.eventCollapsedExpandedHandler,
-						expandNode: this.eventCollapsedExpandedHandler,
-						eventClick: this.eventClickHandler,
-						timeAxisChange: this.timeAxisChangeHandler
-					}
-				}
-
-				schedulerOptions = Object.assign(schedulerOptions, schedulerPreset);
-
+		Promise.all(getDataPromises)
+			.then(results => {
 				if (this.template.querySelector('.scheduler-container')) {
 					this.template.querySelector('.scheduler-container').innerHTML = '';
 				}
 
-				this.scheduler = new bryntum.schedulerpro.SchedulerPro(schedulerOptions);
-				this.scheduler.render(this.template.querySelector('.scheduler-container'));
+				for (let schedulerIndex = 0; schedulerIndex < results.length; schedulerIndex++) {
+					const result = results[schedulerIndex];
 
-				setTimeout(() => {
-					if (this.template.querySelector('.b-float-root')) {
-						this.template.querySelector('.b-float-root').innerHTML = '';
+					const extensibleResult = JSON.parse(JSON.stringify(result));
+
+					this.removeEmptyChildrenArrays(extensibleResult.resources);
+
+					const resourceStore = new bryntum.schedulerpro.ResourceStore({
+						tree: true,
+						data: this.collapseResourcesFromState(this.mergeResourceRecords(extensibleResult.resources), schedulerIndex)
+					});
+
+					const eventStore = new bryntum.schedulerpro.EventStore({
+						data: this.mergeEventRecords(extensibleResult.events)
+					});
+
+					const maintenanceTimeRanges = extensibleResult.maintenanceTimeRanges;
+					maintenanceTimeRanges.map(timeRange => {
+						timeRange.style = 'background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2) 10px, rgba(190, 190, 190, 0.2) 10px, rgba(190, 190, 190, 0.2) 20px) rgba(255, 255, 255, 0); color: #888;';
+					});
+
+					const columns = extensibleResult.resourceColumns;
+					const columnsWidth = this.getSavedColumnsWidth(schedulerIndex);
+
+					for (let i = 0; i < columnsWidth.length; i++) {
+						columns[i].width = columnsWidth[i];
 					}
 
-					if (this.template.querySelector('.b-grid-headers')) {
-						this.template.querySelector('.b-grid-headers').addEventListener('click', () => {
+					extensibleResult.resourceColumns[0].type = 'tree';
+
+					let filterBarOptions = this.enableColumnFiltering || false;
+					if (filterBarOptions) {
+						const filter = [];
+
+						if (this.savedResourceColumnsFilters && this.savedResourceColumnsFilters[schedulerIndex]) {
+							Object.keys(this.savedResourceColumnsFilters[schedulerIndex]).map(filterKey => {
+								filter.push({
+									property: filterKey,
+									value: this.savedResourceColumnsFilters[schedulerIndex][filterKey]
+								})
+							});
+						}
+
+						filterBarOptions = {
+							filter: filter
+						}
+					}
+
+					let schedulerOptions = {
+						appendTo: this.template.querySelector('.scheduler-container'),
+
+						minHeight: this.componentHeight,
+
+						enableEventAnimations: false,
+						createEventOnDblClick: false,
+
+						viewPreset : {},
+
+						eventLayout: this.eventLayoutType || 'stack',
+
+						fillTicks: this.responsiveType === 'Small',
+
+						features: {
+							tree: true,
+							eventDragCreate: false,
+							contextMenu: false,
+							enableEventAnimations: false,
+							dependencies: false,
+							resourceTimeRanges: true,
+							timeRanges: true,
+							filterBar: this.responsiveType !== 'Small' ? filterBarOptions : false,
+							stripe: true,
+
+							timeAxisHeaderMenu: {
+								items: {
+									eventsFilter: false
+								}
+							},
+
+							eventMenu: {
+								items: {
+									deleteEvent: false,
+									unassignEvent: false,
+
+									extraItem: {
+										text: 'Open Event',
+										onItem: ({eventRecord}) => {
+											window.open(window.location.origin + '/' + eventRecord.formulaId || eventRecord.id, '_blank');
+										}
+									}
+								}
+							},
+
+							eventTooltip: {
+								template: (event) => {
+									let template = '';
+
+									extensibleResult.eventTooltipFields.map(field => {
+										let value = event.eventRecord[field];
+										let currentObjectLevel = event.eventRecord;
+
+										if (field.includes('.')) {
+											const fieldParts = field.split('.');
+											let i = 0;
+
+											while (typeof currentObjectLevel === 'object' && currentObjectLevel != null) {
+												currentObjectLevel = currentObjectLevel[fieldParts[i]];
+
+												i++;
+											}
+
+											value = currentObjectLevel;
+										}
+
+										if (this.showFieldNamesWhenHovered) {
+											value = extensibleResult.eventTooltipFieldsNames[field] + ': ' + value;
+										}
+
+										template += `<div>${value}</div>`;
+									});
+
+									return template;
+								}
+							}
+						},
+
+						columns: columns,
+
+						barMargin: parseInt(this.eventMargin) || 0,
+
+						resourceStore: resourceStore,
+						eventStore: eventStore,
+						resourceTimeRanges: [].concat(maintenanceTimeRanges),
+						timeRanges: [].concat(extensibleResult.timeRanges),
+
+						listeners: {
+							eventDrop: this.eventDropResizeHandler,
+							eventResizeEnd: this.eventDropResizeHandler,
+							collapseNode: this.eventCollapsedExpandedHandler,
+							expandNode: this.eventCollapsedExpandedHandler,
+							eventClick: this.eventClickHandler,
+							timeAxisChange: this.timeAxisChangeHandler
+						}
+					}
+
+					schedulerOptions = Object.assign(schedulerOptions, schedulerPreset);
+
+					const scheduler = new bryntum.schedulerpro.SchedulerPro(schedulerOptions);
+					scheduler.relatedComponent = this;
+					scheduler.schedulerIndex = schedulerIndex;
+
+					this.schedulers.push(scheduler);
+				}
+
+				setTimeout(() => {
+					Array.from(this.template.querySelectorAll('.b-float-root')).map(root => {
+						root.innerHTML = '';
+					});
+
+					Array.from(this.template.querySelectorAll('.b-grid-headers')).map(header => {
+						header.addEventListener('click', () => {
 							this.resourceColumnsFiltersChanged = true;
 
 							this.saveSchedulerState();
-						})
-					}
+						});
+					});
 				}, 0);
 
 				if (this.enableColumnFiltering) {
 					this.attachResourceFilterChangeEvents();
 				}
-
-				this.scheduler.relatedComponent = this;
 
 				this.showSpinner = false;
 			})
@@ -305,38 +339,44 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	}
 
 	saveSchedulerState() {
-		const state = JSON.parse(window.localStorage.getItem(window.location + 'schedulerState')) || {};
+		const state = JSON.parse(window.localStorage.getItem(window.location + '-SC')) || {};
 
 		state.preset = this.currentViewPreset;
 		state.collapsedResources = this.collapsedResources;
 		state.startDate = new Date(this.customStartDate).toISOString();
 		state.endDate = new Date(this.customEndDate).toISOString();
 
-		if (!state.resourceColumnsFilters) {
-			state.resourceColumnsFilters = {};
-		}
+		state.resourceColumnsFilters = [];
 
 		if (!this.resourceColumnsFiltersChanged) {
-			state.resourceColumnsFilters = this.savedResourceColumnsFilters || {};
+			state.resourceColumnsFilters = this.savedResourceColumnsFilters || [];
 		} else {
-			Array.from(this.template.querySelectorAll('.b-grid-header .b-filter-bar-field-input')).map(filterInput => {
-				if (!filterInput.value) {
-					delete state.resourceColumnsFilters[filterInput.name];
+			const schedulersNodes = Array.from(this.template.querySelectorAll('.b-schedulerbase'));
 
-					return;
-				}
+			for (let i = 0; i < schedulersNodes.length; i++) {
+				const filters = {};
 
-				state.resourceColumnsFilters[filterInput.name] = filterInput.value;
-			});
+				Array.from(schedulersNodes[i].querySelectorAll('.b-grid-header .b-filter-bar-field-input')).map(filterInput => {
+					if (!filterInput.value) {
+						delete filters[filterInput.name];
+
+						return;
+					}
+
+					filters[filterInput.name] = filterInput.value;
+				});
+
+				state.resourceColumnsFilters.push(filters);
+			}
 		}
 
 		this.savedResourceColumnsFilters = state.resourceColumnsFilters;
 
-		window.localStorage.setItem(window.location + 'schedulerState', JSON.stringify(state));
+		window.localStorage.setItem(window.location + '-SC', JSON.stringify(state));
 	}
 
 	loadSchedulerState() {
-		const state = JSON.parse(window.localStorage.getItem(window.location + 'schedulerState')) || {
+		const state = JSON.parse(window.localStorage.getItem(window.location + '-SC')) || {
 			collapsedResources: [],
 			preset: this.VIEW_PRESET.WEEK
 		};
@@ -352,22 +392,61 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	}
 
 	saveColumnsWidth() {
-		if (!this.scheduler) {
+		if (!this.schedulers.length) {
 			return;
 		}
 
+		const schedulersNodes = Array.from(this.template.querySelectorAll('.b-schedulerbase'));
 		const widths = [];
-		const columns = Array.from(this.template.querySelectorAll('.b-grid-header')).slice(0, -1);
 
-		for (let i = 0; i < columns.length; i++) {
-			widths.push(columns[i].getBoundingClientRect().width);
+		for (let i = 0; i < schedulersNodes.length; i++) {
+			const instanceWidths = [];
+
+			const columns = Array.from(schedulersNodes[i].querySelectorAll('.b-grid-header')).slice(0, -1);
+
+			for (let i = 0; i < columns.length; i++) {
+				instanceWidths.push(columns[i].getBoundingClientRect().width);
+			}
+
+			widths.push(instanceWidths);
 		}
 
-		window.localStorage.setItem(window.location + 'schedulerColumnsWidth', JSON.stringify(widths));
+		window.localStorage.setItem(window.location + '-SCW', JSON.stringify(widths));
 	}
 
-	getSavedColumnsWidth() {
-		return JSON.parse(window.localStorage.getItem(window.location + 'schedulerColumnsWidth')) || [];
+	getSavedColumnsWidth(schedulerIndex) {
+		return (JSON.parse(window.localStorage.getItem(window.location + '-SCW')) || [])[schedulerIndex] || [];
+	}
+
+	initializeCustomSchedulerStyle() {
+		const customClassName = 'scheduler-' + Math.random().toString().substring(2);
+
+		this.template.querySelector('.scheduler-init-container').classList.add(customClassName);
+
+		const styleNode = document.createElement('style');
+
+		styleNode.innerHTML = `.${customClassName} .b-grid-header-text-content {
+			${this.headingFont ? 'font-family: ' + this.headingFont + ' !important;' : ''}
+			${this.headingFontSize ? 'font-size: ' + this.headingFontSize + ' !important;' : ''}
+			${this.headingFontColor ? 'color: ' + this.headingFontColor + ' !important;' : ''}
+			${this.headingAlignment ? 'text-align: ' + this.headingAlignment + ' !important;' : ''}
+		} `;
+
+		const alignToFlex = {
+			'Left': 'flex-start',
+			'Center': 'center',
+			'Right': 'flex-end'
+		}
+
+		styleNode.innerHTML += `.${customClassName} .b-tree-cell-value, .${customClassName} .b-grid-cell {
+			${this.resourceHeadingFont ? 'font-family: ' + this.resourceHeadingFont + ' !important;' : ''}
+			${this.resourceHeadingFontSize ? 'font-size: ' + this.resourceHeadingFontSize + ' !important;' : ''}
+			${this.resourceHeadingFontColor ? 'color: ' + this.resourceHeadingFontColor + ' !important;' : ''}
+			${this.resourceHeadingAlignment ? 'text-align: ' + this.resourceHeadingAlignment + ' !important;' : ''}
+			${this.resourceHeadingAlignment ? 'justify-content: ' + alignToFlex[this.resourceHeadingAlignment] + ' !important;' : ''}
+		} `;
+
+		this.template.querySelector('.scheduler-init-container').appendChild(styleNode);
 	}
 
 	// Preset functions
@@ -519,11 +598,23 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		return result;
 	}
 
-	collapseResourcesFromState(resources) {
-		resources.map(resource => {
-			if (this.collapsedResources.includes(resource.id)) {
+	collapseResourcesFromState(resources, schedulerIndex) {
+		const collapsedResources = this.collapsedResources[schedulerIndex];
+
+		const collapseResource = (resource) => {
+			if (collapsedResources && collapsedResources.includes(resource.id)) {
 				resource.expanded = false;
 			}
+
+			if (resource.children) {
+				resource.children.map(resourceChild => {
+					collapseResource(resourceChild);
+				});
+			}
+		}
+
+		resources.map(resource => {
+			collapseResource(resource);
 		});
 
 		return resources;
@@ -534,19 +625,23 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	expandAllClickHandler() {
 		this.isManualCollapseExpand = true;
 
-		this.scheduler.expandAll()
-			.then(() => {
-				this.isManualCollapseExpand = false;
-			});
+		this.schedulers.map(scheduler => {
+			scheduler.expandAll()
+				.then(() => {
+					this.isManualCollapseExpand = false;
+				});
+		})
 	}
 
 	collapseAllClickHandler() {
 		this.isManualCollapseExpand = true;
 
-		this.scheduler.collapseAll()
-			.then(() => {
-				this.isManualCollapseExpand = false;
-			});
+		this.schedulers.map(scheduler => {
+			scheduler.collapseAll()
+				.then(() => {
+					this.isManualCollapseExpand = false;
+				});
+		})
 	}
 
 	viewPresetPicklistChangeHandler(event) {
@@ -667,8 +762,10 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			resourceId: changedRecord.resourceId
 		}
 
+		const fieldMappingMetadataName = this.schedulerIndex === 0 ? this.relatedComponent.schedulerFieldsMetadataName : this.relatedComponent.secondSchedulerFieldsMetadataName;
+
 		saveEvent({
-			fieldMappingMetadataName: this.relatedComponent.schedulerFieldsMetadataName,
+			fieldMappingMetadataName: fieldMappingMetadataName,
 			eventJSON: JSON.stringify(changedEvent)
 		})
 			.then(() => {
@@ -688,10 +785,12 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			return;
 		}
 
+		this.relatedComponent.collapsedResources[this.schedulerIndex] = this.relatedComponent.collapsedResources[this.schedulerIndex] || [];
+
 		if (event.type === 'collapsenode') {
-			this.relatedComponent.collapsedResources.push(event.record.id);
+			this.relatedComponent.collapsedResources[this.schedulerIndex].push(event.record.id);
 		} else if (event.type === 'expandnode') {
-			this.relatedComponent.collapsedResources.splice(this.relatedComponent.collapsedResources.indexOf(event.record.id), 1);
+			this.relatedComponent.collapsedResources[this.schedulerIndex].splice(this.relatedComponent.collapsedResources.indexOf(event.record.id), 1);
 		}
 
 		this.relatedComponent.saveSchedulerState.call(this.relatedComponent);
