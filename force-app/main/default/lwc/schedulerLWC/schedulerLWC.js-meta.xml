@@ -46,6 +46,8 @@
             
             <property name="showFieldNamesWhenHovered" type="Boolean" label="Show Field Names when an Event hovered"/>
             
+            <property name="columnsOnRight" type="Boolean" label="Columns on Right Side"/>
+            
 
             <property name="headingFont" type="String" label="Heading Font"/>
             

@@ -20,6 +20,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	@api enableColumnFiltering;
 	@api responsiveType;
 	@api showFieldNamesWhenHovered;
+	@api columnsOnRight;
 
 	// Style attributes
 
@@ -183,6 +184,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 					for (let i = 0; i < columnsWidth.length; i++) {
 						columns[i].width = columnsWidth[i];
+						columns[i].region = this.columnsOnRight ? 'right' : 'left';
 					}
 
 					extensibleResult.resourceColumns[0].type = 'tree';
