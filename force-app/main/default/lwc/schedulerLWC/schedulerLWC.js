@@ -43,6 +43,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 	currentViewPreset = this.VIEW_PRESET.WEEK;
 
+	mainSchedulerData;
+
 	schedulers = [];
 
 	startDate;
@@ -158,6 +160,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 					this.template.querySelector('.scheduler-container').innerHTML = '';
 				}
 
+				this.mainSchedulerData = JSON.parse(JSON.stringify(results[0]));
+
 				for (let schedulerIndex = 0; schedulerIndex < results.length; schedulerIndex++) {
 					const result = results[schedulerIndex];
 
@@ -182,29 +186,30 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 					const columns = extensibleResult.resourceColumns;
 					const columnsWidth = this.getSavedColumnsWidth(schedulerIndex);
 
+					for (let i = 0; i < columns.length; i++) {
+						columns[i].region = this.columnsOnRight ? 'right' : 'left';
+					}
+
 					for (let i = 0; i < columnsWidth.length; i++) {
 						columns[i].width = columnsWidth[i];
-						columns[i].region = this.columnsOnRight ? 'right' : 'left';
 					}
 
 					extensibleResult.resourceColumns[0].type = 'tree';
 
-					let filterBarOptions = this.enableColumnFiltering || false;
-					if (filterBarOptions) {
-						const filter = [];
+					let filter = this.enableColumnFiltering || false;
+					if (filter) {
+						const filters = [];
 
 						if (this.savedResourceColumnsFilters && this.savedResourceColumnsFilters[schedulerIndex]) {
 							Object.keys(this.savedResourceColumnsFilters[schedulerIndex]).map(filterKey => {
-								filter.push({
-									property: filterKey,
-									value: this.savedResourceColumnsFilters[schedulerIndex][filterKey]
+								filters.push({
+									property: this.savedResourceColumnsFilters[schedulerIndex][filterKey].property,
+									value: this.savedResourceColumnsFilters[schedulerIndex][filterKey].value
 								})
 							});
 						}
 
-						filterBarOptions = {
-							filter: filter
-						}
+						filter = filters;
 					}
 
 					let schedulerOptions = {
@@ -229,8 +234,11 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 							dependencies: false,
 							resourceTimeRanges: true,
 							timeRanges: true,
-							filterBar: this.responsiveType !== 'Small' ? filterBarOptions : false,
+							filter: this.responsiveType !== 'Small' ? filter : false,
 							stripe: true,
+							// eventDrag: {
+							// 	constrainDragToTimeline: true
+							// },
 
 							timeAxisHeaderMenu: {
 								items: {
@@ -310,6 +318,28 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 					scheduler.relatedComponent = this;
 					scheduler.schedulerIndex = schedulerIndex;
 
+					if (this.enableColumnFiltering) {
+						this.savedResourceColumnsFilters = this.savedResourceColumnsFilters || [];
+
+						scheduler.store.on('filter', (event) => {
+							this.resourceColumnsFiltersChanged = true;
+
+							const allFilters = [];
+
+							for (let i = 0; i < event.filters.allValues.length; i++) {
+								const filter = event.filters.allValues[i];
+
+								allFilters.push({
+									property: filter.property,
+									value: filter.value
+								});
+							}
+
+							this.savedResourceColumnsFilters[schedulerIndex] = allFilters;
+							this.saveSchedulerState();
+						});
+					}
+
 					this.schedulers.push(scheduler);
 				}
 
@@ -317,19 +347,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 					Array.from(this.template.querySelectorAll('.b-float-root')).map(root => {
 						root.innerHTML = '';
 					});
-
-					Array.from(this.template.querySelectorAll('.b-grid-headers')).map(header => {
-						header.addEventListener('click', () => {
-							this.resourceColumnsFiltersChanged = true;
-
-							this.saveSchedulerState();
-						});
-					});
 				}, 0);
-
-				if (this.enableColumnFiltering) {
-					this.attachResourceFilterChangeEvents();
-				}
 
 				this.showSpinner = false;
 			})
@@ -347,32 +365,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		state.collapsedResources = this.collapsedResources;
 		state.startDate = new Date(this.customStartDate).toISOString();
 		state.endDate = new Date(this.customEndDate).toISOString();
-
-		state.resourceColumnsFilters = [];
-
-		if (!this.resourceColumnsFiltersChanged) {
-			state.resourceColumnsFilters = this.savedResourceColumnsFilters || [];
-		} else {
-			const schedulersNodes = Array.from(this.template.querySelectorAll('.b-schedulerbase'));
-
-			for (let i = 0; i < schedulersNodes.length; i++) {
-				const filters = {};
-
-				Array.from(schedulersNodes[i].querySelectorAll('.b-grid-header .b-filter-bar-field-input')).map(filterInput => {
-					if (!filterInput.value) {
-						delete filters[filterInput.name];
-
-						return;
-					}
-
-					filters[filterInput.name] = filterInput.value;
-				});
-
-				state.resourceColumnsFilters.push(filters);
-			}
-		}
-
-		this.savedResourceColumnsFilters = state.resourceColumnsFilters;
+		state.resourceColumnsFilters = this.savedResourceColumnsFilters || [];
 
 		window.localStorage.setItem(window.location + '-SC', JSON.stringify(state));
 	}
@@ -736,16 +729,6 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		this.initScheduler();
 	}
 
-	attachResourceFilterChangeEvents() {
-		Array.from(this.template.querySelectorAll('.b-grid-header .b-filter-bar-field-input')).map(filterInput => {
-			filterInput.addEventListener('input', event => {
-				this.resourceColumnsFiltersChanged = true;
-
-				this.saveSchedulerState();
-			});
-		});
-	}
-
 	// Scheduler Listeners
 
 	eventDropResizeHandler(event) {
@@ -850,6 +833,10 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			label: 'Custom',
 			value: this.VIEW_PRESET.CUSTOM.toString()
 		}]
+	}
+
+	get renderCreateEventModal() {
+		return this.schedulers && this.schedulers.length > 0;
 	}
 
 }
