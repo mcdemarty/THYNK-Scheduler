@@ -180,6 +180,23 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 						data: this.mergeEventRecords(extensibleResult.events)
 					});
 
+					const assignments = [];
+					for (let i = 0; i < eventStore.allRecords.length; i++) {
+						const eventRecord = eventStore.allRecords[i];
+
+						assignments.push({
+							resourceId: eventRecord.resourceId || eventRecord.firstResourceId,
+							eventId: eventRecord.id
+						});
+
+						if (eventRecord.secondResourceId) {
+							assignments.push({
+								resourceId: eventRecord.secondResourceId,
+								eventId: eventRecord.id
+							});
+						}
+					}
+
 					const maintenanceTimeRanges = extensibleResult.maintenanceTimeRanges;
 					maintenanceTimeRanges.map(timeRange => {
 						timeRange.style = 'background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2) 10px, rgba(190, 190, 190, 0.2) 10px, rgba(190, 190, 190, 0.2) 20px) rgba(255, 255, 255, 0); color: #888;';
@@ -239,7 +256,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 							filter: this.responsiveType !== 'Small' ? filter : false,
 							stripe: true,
 							// eventDrag: {
-							// 	constrainDragToTimeline: true
+							// 	constrainDragToTimeline: false
 							// },
 
 							timeAxisHeaderMenu: {
@@ -303,6 +320,9 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 						eventStore: eventStore,
 						resourceTimeRanges: [].concat(maintenanceTimeRanges),
 						timeRanges: [].concat(extensibleResult.timeRanges),
+						assignmentStore: new bryntum.schedulerpro.AssignmentStore({
+							data: assignments
+						}),
 
 						listeners: {
 							eventDrop: this.eventDropResizeHandler,
@@ -310,7 +330,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 							collapseNode: this.eventCollapsedExpandedHandler,
 							expandNode: this.eventCollapsedExpandedHandler,
 							eventClick: this.eventClickHandler,
-							timeAxisChange: this.timeAxisChangeHandler
+							// timeAxisChange: this.timeAxisChangeHandler
 						}
 					}
 
@@ -349,6 +369,14 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 					Array.from(this.template.querySelectorAll('.b-float-root')).map(root => {
 						root.innerHTML = '';
 					});
+
+					// for (let i = 1; i < this.schedulers.length; i++) {
+					// 	this.schedulers[i].partner = this.schedulers[i - 1];
+					// }
+
+					for (let i = 0; i < this.schedulers.length; i++) {
+						this.schedulers[i].on('timeAxisChange', this.timeAxisChangeHandler);
+					}
 				}, 0);
 
 				this.showSpinner = false;
@@ -589,6 +617,11 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			let newEvent = Object.assign(event, event.eventRecord);
 			delete newEvent.eventRecord;
 
+			if (newEvent.secondResourceId) {
+				newEvent.firstResourceId = newEvent.resourceId;
+				delete newEvent.resourceId;
+			}
+
 			result.push(newEvent);
 		});
 
@@ -746,7 +779,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			id: changedRecord.id,
 			startDate: changedRecord.startDate.toISOString(),
 			endDate: changedRecord.endDate.toISOString(),
-			resourceId: changedRecord.resourceId
+			resourceId: changedRecord.resourceId || changedRecord.firstResourceId,
+			secondResourceId: changedRecord.secondResourceId
 		}
 
 		const fieldMappingMetadataName = this.schedulerIndex === 0 ? this.relatedComponent.schedulerFieldsMetadataName : this.relatedComponent.secondSchedulerFieldsMetadataName;

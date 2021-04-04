@@ -70,6 +70,12 @@ public without sharing class SchedulerControllerV2 {
 			throw new SchedulerException('This resource isn\'t bookable');
 		}
 
+		if (String.isNotEmpty(event.secondResourceId)) {
+			if (!isResourceBookable(fieldMappingMetadataName, event.secondResourceId)) {
+				throw new SchedulerException('This resource isn\'t bookable');
+			}
+		}
+
 		if (!getMaintenanceTimeRanges(fieldMappingMetadataName, event.startDate, event.endDate, new List<Id> { event.resourceId }).isEmpty()) {
 			throw new SchedulerException('This resource is in maintenance for this dates');
 		}
@@ -216,6 +222,10 @@ public without sharing class SchedulerControllerV2 {
 			schedulerFields.Event_Style_API_Field__c,
 			schedulerFields.Event_Id_API_Field__c
 		};
+
+		if (String.isNotEmpty(schedulerFields.Event_Second_Parent_Resource_API_Field__c)) {
+			fieldsToRetrieve.add(schedulerFields.Event_Second_Parent_Resource_API_Field__c);
+		}
 
 		if (String.isNotEmpty(schedulerFields.Event_Tooltip_Fields__c)) {
 			fieldsToRetrieve.addAll(schedulerFields.Event_Tooltip_Fields__c.replaceAll(' ', '').split(','));
@@ -400,6 +410,10 @@ public without sharing class SchedulerControllerV2 {
 	}
 
 	private static Object getSafeFieldValue(String fieldPath, SObject parentObject) {
+		if (String.isEmpty(fieldPath)) {
+			return null;
+		}
+
 		if (!fieldPath.contains('.')) {
 			return parentObject.get(fieldPath);
 		} else {
@@ -508,6 +522,8 @@ public without sharing class SchedulerControllerV2 {
 		@AuraEnabled
 		public Id resourceId;
 		@AuraEnabled
+		public Id secondResourceId;
+		@AuraEnabled
 		public String eventColor;
 		@AuraEnabled
 		public String eventStyle;
@@ -523,6 +539,7 @@ public without sharing class SchedulerControllerV2 {
 			endDate = Datetime.valueOf(getSafeFieldValue(schedulerFields.Event_End_Date_API_Field__c, event));
 			name = String.valueOf(getSafeFieldValue(schedulerFields.Event_Name_API_Field__c, event));
 			resourceId = String.valueOf(getSafeFieldValue(schedulerFields.Event_Parent_Resource_API_Field__c, event));
+			secondResourceId = String.valueOf(getSafeFieldValue(schedulerFields.Event_Second_Parent_Resource_API_Field__c, event));
 
 			if (getSafeFieldValue(schedulerFields.Event_Color_API_Field__c, event) != null) {
 				eventColor = String.valueOf(getSafeFieldValue(schedulerFields.Event_Color_API_Field__c, event));
