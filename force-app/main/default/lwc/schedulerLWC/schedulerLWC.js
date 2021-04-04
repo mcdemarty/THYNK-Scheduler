@@ -12,7 +12,9 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	@api schedulerFieldsMetadataName;
 	@api secondSchedulerFieldsMetadataName;
 	@api eventCustomFilter;
+	@api secondEventCustomFilter;
 	@api resourceCustomFilter;
+	@api secondResourceCustomFilter;
 	@api resourceOrderRule;
 	@api componentHeight;
 	@api eventMargin;
@@ -148,8 +150,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 				fieldMappingMetadataName: this.secondSchedulerFieldsMetadataName,
 				startDate: schedulerPreset.startDate.toISOString(),
 				endDate: schedulerPreset.endDate.toISOString(),
-				eventCustomFilter: this.eventCustomFilter,
-				resourceCustomFilter: this.resourceCustomFilter,
+				eventCustomFilter: this.secondEventCustomFilter,
+				resourceCustomFilter: this.secondResourceCustomFilter,
 				resourceOrderRule: this.resourceOrderRule
 			}));
 		}

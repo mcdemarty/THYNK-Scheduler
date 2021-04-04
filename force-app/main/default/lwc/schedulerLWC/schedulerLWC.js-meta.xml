@@ -30,7 +30,11 @@
             
             <property name="eventCustomFilter" type="String" label="Event Custom Filter"/>
             
+            <property name="secondEventCustomFilter" type="String" label="Second Instance Event Custom Filter"/>
+            
             <property name="resourceCustomFilter" type="String" label="Resource Custom Filter"/>
+            
+            <property name="secondResourceCustomFilter" type="String" label=" Second Instance Resource Custom Filter"/>
             
             <property name="resourceOrderRule" type="String" label="Resource Order Rule"/>
             
