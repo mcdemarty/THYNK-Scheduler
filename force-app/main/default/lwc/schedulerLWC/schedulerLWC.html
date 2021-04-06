@@ -32,12 +32,12 @@
 		</div>
 	</div>
 
-	<template if:true={schedulerData}>
-		<c-scheduler-event-create-modal class="scheduler-event-create-modal" event-object-name={schedulerData.eventObjectName}
-										fields={schedulerData.eventEditFields} oneventcreate={eventCreateHandler}
+	<template if:true={renderCreateEventModal}>
+		<c-scheduler-event-create-modal class="scheduler-event-create-modal" event-object-name={mainSchedulerData.eventObjectName}
+										fields={mainSchedulerData.eventEditFields} oneventcreate={eventCreateHandler}
 										event-id={selectedEventId} field-mapping-metadata-name={schedulerFieldsMetadataName}
-										event-parent-resource-field-name={schedulerData.eventParentResourceFieldAPIName}
-										event-start-date-field-name={schedulerData.eventStartDateFieldAPIName}
-										event-end-date-field-name={schedulerData.eventEndDateFieldAPIName}></c-scheduler-event-create-modal>
+										event-parent-resource-field-name={mainSchedulerData.eventParentResourceFieldAPIName}
+										event-start-date-field-name={mainSchedulerData.eventStartDateFieldAPIName}
+										event-end-date-field-name={mainSchedulerData.eventEndDateFieldAPIName}></c-scheduler-event-create-modal>
 	</template>
 </template>
