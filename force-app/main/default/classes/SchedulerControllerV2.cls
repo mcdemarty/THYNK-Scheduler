@@ -169,14 +169,17 @@ public without sharing class SchedulerControllerV2 {
 		List<ResourceColumn> columns = new List<ResourceColumn>();
 
 		List<String> fields = schedulerFields.Resource_Display_Columns_API_Fields__c.split(',');
-		List<String> hiddenFields = schedulerFields.Resource_Hidden_Columns_API_Fields__c.split(',');
+		List<String> hiddenFields = new List<String>();
+
+		if (String.isNotEmpty(schedulerFields.Resource_Hidden_Columns_API_Fields__c)) {
+			hiddenFields = schedulerFields.Resource_Hidden_Columns_API_Fields__c.split(',');
+		}
 
 		if (fields.isEmpty()) {
 			return columns;
 		}
 
 		SObjectType resourceObjectType = Schema.getGlobalDescribe().get(schedulerFields.Resource_API_Name__c);
-		Map<String, SObjectField> fieldsDescribeSource = Schema.getGlobalDescribe().get(schedulerFields.Resource_API_Name__c).getDescribe().fields.getMap();
 
 		for (String field : fields) {
 			String trimmedField = field.trim();
@@ -216,12 +219,24 @@ public without sharing class SchedulerControllerV2 {
 			schedulerFields.Event_Start_Date_API_Field__c,
 			schedulerFields.Event_End_Date_API_Field__c,
 			schedulerFields.Event_Name_API_Field__c,
-			schedulerFields.Event_Parent_Resource_API_Field__c,
-			schedulerFields.Event_Color_API_Field__c,
-			schedulerFields.Event_Icon_API_Field__c,
-			schedulerFields.Event_Style_API_Field__c,
-			schedulerFields.Event_Id_API_Field__c
+			schedulerFields.Event_Parent_Resource_API_Field__c
 		};
+
+		if (String.isNotEmpty(schedulerFields.Event_Color_API_Field__c)) {
+			fieldsToRetrieve.add(schedulerFields.Event_Color_API_Field__c);
+		}
+
+		if (String.isNotEmpty(schedulerFields.Event_Icon_API_Field__c)) {
+			fieldsToRetrieve.add(schedulerFields.Event_Icon_API_Field__c);
+		}
+
+		if (String.isNotEmpty(schedulerFields.Event_Style_API_Field__c)) {
+			fieldsToRetrieve.add(schedulerFields.Event_Style_API_Field__c);
+		}
+
+		if (String.isNotEmpty(schedulerFields.Event_Id_API_Field__c)) {
+			fieldsToRetrieve.add(schedulerFields.Event_Id_API_Field__c);
+		}
 
 		if (String.isNotEmpty(schedulerFields.Event_Second_Parent_Resource_API_Field__c)) {
 			fieldsToRetrieve.add(schedulerFields.Event_Second_Parent_Resource_API_Field__c);

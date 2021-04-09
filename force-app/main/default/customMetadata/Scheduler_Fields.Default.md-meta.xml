@@ -32,7 +32,7 @@
     </values>
     <values>
         <field>Event_Id_API_Field__c</field>
-        <value xsi:type="xsd:string">Id</value>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Event_Name_API_Field__c</field>
@@ -48,7 +48,7 @@
     </values>
     <values>
         <field>Event_Second_Parent_Resource_API_Field__c</field>
-        <value xsi:type="xsd:string">Second_Parent_Resource__c</value>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Event_Start_Date_API_Field__c</field>
@@ -60,11 +60,11 @@
     </values>
     <values>
         <field>Event_Style_API_Field__c</field>
-        <value xsi:type="xsd:string">Style__c</value>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Event_Tooltip_Fields__c</field>
-        <value xsi:type="xsd:string">Id, Name, Start_Date__c</value>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Hotel_API_Name__c</field>
@@ -88,7 +88,7 @@
     </values>
     <values>
         <field>Resource_Hidden_Columns_API_Fields__c</field>
-        <value xsi:type="xsd:string">Type__c, Parent_Resource__c</value>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Resource_Hotel_API_Name__c</field>
@@ -124,23 +124,23 @@
     </values>
     <values>
         <field>Resource_Opening_Hours_API_Name__c</field>
-        <value xsi:type="xsd:string">SP_Resource_Opening_Hours__c</value>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Resource_Opening_Hours_Days_API_Field__c</field>
-        <value xsi:type="xsd:string">Days__c</value>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Resource_Opening_Hours_End_Time__c</field>
-        <value xsi:type="xsd:string">End_Time__c</value>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Resource_Opening_Hours_Resource__c</field>
-        <value xsi:type="xsd:string">Resource__c</value>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Resource_Opening_Hours_Start_Time__c</field>
-        <value xsi:type="xsd:string">Start_Time__c</value>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Resource_Order_Rule__c</field>
@@ -152,7 +152,7 @@
     </values>
     <values>
         <field>Resource_Type_API_Name__c</field>
-        <value xsi:type="xsd:string">Type__c</value>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Time_Range_API_Name__c</field>
