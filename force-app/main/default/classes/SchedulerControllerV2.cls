@@ -636,6 +636,8 @@ public without sharing class SchedulerControllerV2 {
 		public Boolean draggable = false;
 		@AuraEnabled
 		public Boolean hidden = false;
+		@AuraEnabled
+		public Boolean editor = false;
 	}
 
 	public class SchedulerFieldMappingException extends Exception {}
