@@ -255,6 +255,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 							timeRanges: true,
 							filter: this.responsiveType !== 'Small' ? filter : false,
 							stripe: true,
+							scheduleMenu: false,
 							// eventDrag: {
 							// 	constrainDragToTimeline: false
 							// },
