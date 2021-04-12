@@ -93,4 +93,8 @@ export default class SchedulerEventCreateModal extends LightningElement {
 		}));
 	}
 
+	get modalLabel() {
+		return this.eventId ? 'Edit Event' : 'Create Event';
+	}
+
 }

@@ -255,6 +255,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 							timeRanges: true,
 							filter: this.responsiveType !== 'Small' ? filter : false,
 							stripe: true,
+							scheduleMenu: false,
+							cellMenu: false,
 							// eventDrag: {
 							// 	constrainDragToTimeline: false
 							// },
@@ -389,6 +391,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	}
 
 	saveSchedulerState() {
+
+
 		const state = JSON.parse(window.localStorage.getItem(window.location + '-SC')) || {};
 
 		state.preset = this.currentViewPreset;
@@ -428,9 +432,17 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			const instanceWidths = [];
 
 			const columns = Array.from(schedulersNodes[i].querySelectorAll('.b-grid-header')).slice(0, -1);
+			let totalWidth = 0;
 
 			for (let i = 0; i < columns.length; i++) {
-				instanceWidths.push(columns[i].getBoundingClientRect().width);
+				const width = columns[i].getBoundingClientRect().width;
+
+				instanceWidths.push(width);
+				totalWidth += width;
+			}
+
+			if (columns[0].parentNode.getBoundingClientRect().width < totalWidth) {
+				instanceWidths[columns.length - 1] = columns[0].parentNode.getBoundingClientRect().width - (totalWidth - instanceWidths[columns.length - 1]);
 			}
 
 			widths.push(instanceWidths);
