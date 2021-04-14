@@ -47,6 +47,10 @@
         <value xsi:type="xsd:string">Parent_Resource__c</value>
     </values>
     <values>
+        <field>Event_Previous_Event_API_Field__c</field>
+        <value xsi:type="xsd:string">Previous_Event__c</value>
+    </values>
+    <values>
         <field>Event_Second_Parent_Resource_API_Field__c</field>
         <value xsi:nil="true"/>
     </values>

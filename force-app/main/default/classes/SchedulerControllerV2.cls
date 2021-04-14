@@ -254,6 +254,10 @@ public without sharing class SchedulerControllerV2 {
 			fieldsToRetrieve.addAll(schedulerFields.Event_Tooltip_Fields__c.replaceAll(' ', '').split(','));
 		}
 
+		if (String.isNotEmpty(schedulerFields.Event_Previous_Event_API_Field__c)) {
+			fieldsToRetrieve.add(schedulerFields.Event_Previous_Event_API_Field__c);
+		}
+
 		Map<String, SObjectType> schemaGlobalDescribeResult = Schema.getGlobalDescribe();
 
 		if (!schemaGlobalDescribeResult.containsKey(schedulerFields.Event_API_Name__c)) {
@@ -557,6 +561,8 @@ public without sharing class SchedulerControllerV2 {
 		public String iconCls;
 		@AuraEnabled
 		public SObject eventRecord;
+		@AuraEnabled
+		public Id previousEvent;
 
 		public SchedulerEvent(SObject event, Scheduler_Fields__mdt schedulerFields) {
 			id = event.Id;
@@ -566,6 +572,7 @@ public without sharing class SchedulerControllerV2 {
 			name = String.valueOf(getSafeFieldValue(schedulerFields.Event_Name_API_Field__c, event));
 			resourceId = String.valueOf(getSafeFieldValue(schedulerFields.Event_Parent_Resource_API_Field__c, event));
 			secondResourceId = String.valueOf(getSafeFieldValue(schedulerFields.Event_Second_Parent_Resource_API_Field__c, event));
+			previousEvent = String.valueOf(getSafeFieldValue(schedulerFields.Event_Previous_Event_API_Field__c, event));
 
 			if (getSafeFieldValue(schedulerFields.Event_Color_API_Field__c, event) != null) {
 				eventColor = String.valueOf(getSafeFieldValue(schedulerFields.Event_Color_API_Field__c, event));

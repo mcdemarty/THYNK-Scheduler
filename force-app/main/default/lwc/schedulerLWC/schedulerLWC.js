@@ -179,6 +179,17 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 						data: this.collapseResourcesFromState(this.mergeResourceRecords(extensibleResult.resources), schedulerIndex)
 					});
 
+					const dependenciesData = [];
+
+					extensibleResult.events.map(event => {
+						if (event.previousEvent) {
+							dependenciesData.push({
+								fromEvent: event.previousEvent,
+								toEvent: event.id
+							});
+						}
+					});
+
 					const eventStore = new bryntum.schedulerpro.EventStore({
 						data: this.mergeEventRecords(extensibleResult.events)
 					});
@@ -252,6 +263,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 						filter = filters;
 					}
 
+					console.log(dependenciesData);
+
 					let schedulerOptions = {
 						appendTo: this.template.querySelector('.scheduler-container'),
 
@@ -271,7 +284,6 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 							eventDragCreate: false,
 							contextMenu: false,
 							enableEventAnimations: false,
-							dependencies: false,
 							resourceTimeRanges: true,
 							timeRanges: true,
 							filter: this.responsiveType !== 'Small' ? filter : false,
@@ -281,6 +293,10 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 							// eventDrag: {
 							// 	constrainDragToTimeline: false
 							// },
+
+							dependencies: {
+								allowCreate: false
+							},
 
 							timeAxisHeaderMenu: {
 								items: {
@@ -331,6 +347,9 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 						timeRanges: [].concat(extensibleResult.timeRanges),
 						assignmentStore: new bryntum.schedulerpro.AssignmentStore({
 							data: assignments
+						}),
+						dependencyStore: new bryntum.schedulerpro.DependencyStore({
+							data: dependenciesData
 						}),
 
 						listeners: {
