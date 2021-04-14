@@ -131,7 +131,9 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		this.customEndDate = schedulerPreset.endDate;
 
 		this.minSelectableEndDate = this.startDate;
-		this.maxSelectableStartDate = this.endDate;
+		this.maxSelectableStartDate = new Date(this.endDate);
+		this.maxSelectableStartDate.setDate(this.maxSelectableStartDate.getDate() - 1);
+		this.maxSelectableStartDate = this.maxSelectableStartDate.toISOString();
 
 		this.saveSchedulerState();
 
@@ -216,6 +218,23 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 					}
 
 					extensibleResult.resourceColumns[0].type = 'tree';
+					extensibleResult.resourceColumns[0].renderer = (event) => {
+						const field = event.dataField.dataSource;
+						let value = this.getNestedFieldValue(event.record[field], event.record, field);
+
+						if (event.record.imageUrl) {
+							if (!event.cellElement.querySelector('.b-tree-cell-value img') && event.cellElement.querySelector('.b-tree-cell-value')) {
+								const div = document.createElement('div');
+								div.innerHTML = `<img draggable="false" style="max-width: none; height: 55px; user-select: none" src="${event.record.imageUrl}"/>`
+
+								div.style = 'height: 40px; width: 40px; overflow: hidden; border-radius: 50%; margin-right: 0.5rem';
+
+								event.cellElement.querySelector('.b-tree-cell-value').insertBefore(div, event.cellElement.querySelector('.b-tree-cell-value').childNodes[0]);
+							}
+						}
+
+						return value;
+					}
 
 					let filter = this.enableColumnFiltering || false;
 					if (filter) {
@@ -288,25 +307,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 									let template = '';
 
 									extensibleResult.eventTooltipFields.map(field => {
-										let value = event.eventRecord[field];
-										let currentObjectLevel = event.eventRecord;
-
-										if (field.includes('.')) {
-											const fieldParts = field.split('.');
-											let i = 0;
-
-											while (typeof currentObjectLevel === 'object' && currentObjectLevel != null) {
-												currentObjectLevel = currentObjectLevel[fieldParts[i]];
-
-												i++;
-											}
-
-											value = currentObjectLevel;
-										}
-
-										if (value && value.match && value.match(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d.\d{3}Z$/)) {
-											value = new Date(value).toLocaleString();
-										}
+										const value = this.getNestedFieldValue(event.eventRecord[field], event.eventRecord, field);
 
 										if (this.showFieldNamesWhenHovered) {
 											value = extensibleResult.eventTooltipFieldsNames[field] + ': ' + value;
@@ -612,6 +613,10 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			const result = [];
 
 			resources.map(resource => {
+				if (!resource.imageUrl) {
+					resource.image = false;
+				}
+
 				let newResource = Object.assign(resource, resource.resourceRecord);
 				delete newResource.resourceRecord;
 
@@ -855,6 +860,27 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 			this.relatedComponent.initScheduler(true);
 		}, 1000);
+	}
+
+	getNestedFieldValue(value, currentObjectLevel, field) {
+		if (field.includes('.')) {
+			const fieldParts = field.split('.');
+			let i = 0;
+
+			while (typeof currentObjectLevel === 'object' && currentObjectLevel != null) {
+				currentObjectLevel = currentObjectLevel[fieldParts[i]];
+
+				i++;
+			}
+
+			value = currentObjectLevel;
+		}
+
+		if (value && value.match && value.match(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d.\d{3}Z$/)) {
+			value = new Date(value).toLocaleString();
+		}
+
+		return value;
 	}
 
 	showErrorToast(message) {

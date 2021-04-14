@@ -103,6 +103,10 @@
         <value xsi:type="xsd:string">b-fa b-fa-home</value>
     </values>
     <values>
+        <field>Resource_Image_API_FIeld__c</field>
+        <value xsi:type="xsd:string">Image__c</value>
+    </values>
+    <values>
         <field>Resource_Maintenance_API_Name__c</field>
         <value xsi:type="xsd:string">SP_Resource_Maintenance__c</value>
     </values>

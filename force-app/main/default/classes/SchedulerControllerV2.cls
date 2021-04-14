@@ -116,6 +116,10 @@ public without sharing class SchedulerControllerV2 {
 			fieldsToRetrieve.addAll(schedulerFields.Resource_Hidden_Columns_API_Fields__c.replaceAll(' ', '').split(','));
 		}
 
+		if (!String.isEmpty(schedulerFields.Resource_Image_API_Field__c)) {
+			fieldsToRetrieve.add(schedulerFields.Resource_Image_API_Field__c);
+		}
+
 		Map<String, SObjectType> schemaGlobalDescribeResult = Schema.getGlobalDescribe();
 
 		if (!schemaGlobalDescribeResult.containsKey(schedulerFields.Resource_API_Name__c)) {
@@ -207,6 +211,10 @@ public without sharing class SchedulerControllerV2 {
 			resourceColumn.hidden = true;
 
 			columns.add(resourceColumn);
+		}
+
+		if (!columns.isEmpty()) {
+			columns[0].type = 'resourceInfo';
 		}
 
 		return columns;
@@ -496,6 +504,8 @@ public without sharing class SchedulerControllerV2 {
 		public Boolean expanded = true;
 		@AuraEnabled
 		public String iconCls;
+		@AuraEnabled
+		public String imageUrl;
 
 		@AuraEnabled
 		public List<SchedulerEvent> events = new List<SchedulerEvent>();
@@ -508,6 +518,7 @@ public without sharing class SchedulerControllerV2 {
 		public SchedulerResource(SObject resource, Scheduler_Fields__mdt schedulerFields) {
 			id = resource.Id;
 			name = String.valueOf(getSafeFieldValue(schedulerFields.Resource_Name_API_Field__c, resource));
+			imageUrl = String.valueOf(getSafeFieldValue(schedulerFields.Resource_Image_API_Field__c, resource));
 
 			if (getSafeFieldValue(schedulerFields.Resource_Parent_Resource_API_Field__c, resource) != null) {
 				parentResource = String.valueOf(getSafeFieldValue(schedulerFields.Resource_Parent_Resource_API_Field__c, resource));
@@ -638,6 +649,8 @@ public without sharing class SchedulerControllerV2 {
 		public Boolean hidden = false;
 		@AuraEnabled
 		public Boolean editor = false;
+		@AuraEnabled
+		public String type;
 	}
 
 	public class SchedulerFieldMappingException extends Exception {}
