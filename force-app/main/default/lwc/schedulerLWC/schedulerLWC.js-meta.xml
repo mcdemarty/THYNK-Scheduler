@@ -52,6 +52,8 @@
             
             <property name="columnsOnRight" type="Boolean" label="Columns on Right Side"/>
             
+            <property name="columnsAutoHeight" type="Boolean" label="Columns Auto Height"/>
+            
 
             <property name="headingFont" type="String" label="Heading Font"/>
             

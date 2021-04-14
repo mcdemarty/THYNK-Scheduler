@@ -23,6 +23,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	@api responsiveType;
 	@api showFieldNamesWhenHovered;
 	@api columnsOnRight;
+	@api columnsAutoHeight;
 
 	// Style attributes
 
@@ -87,7 +88,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		])
 			.then(() => {
 				setTimeout(() => {
-					bryntum.schedulerpro.init(this.template.querySelector('.scheduler-init-container'));
+					// bryntum.schedulerpro.init(this.template.querySelector('.scheduler-init-container'));
 
 					this.initializeCustomSchedulerStyle();
 
@@ -207,6 +208,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 					for (let i = 0; i < columns.length; i++) {
 						columns[i].region = this.columnsOnRight ? 'right' : 'left';
+						columns[i].autoHeight = this.columnsAutoHeight;
 					}
 
 					for (let i = 0; i < columnsWidth.length; i++) {
@@ -300,6 +302,10 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 											}
 
 											value = currentObjectLevel;
+										}
+
+										if (value && value.match && value.match(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d.\d{3}Z$/)) {
+											value = new Date(value).toLocaleString();
 										}
 
 										if (this.showFieldNamesWhenHovered) {

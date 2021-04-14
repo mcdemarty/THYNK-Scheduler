@@ -31,6 +31,10 @@
         <value xsi:type="xsd:string">fas fa-calendar-day</value>
     </values>
     <values>
+        <field>Event_Id_API_Field__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
         <field>Event_Name_API_Field__c</field>
         <value xsi:type="xsd:string">thn__MYCE_Quote__r.Name</value>
     </values>
@@ -43,12 +47,28 @@
         <value xsi:type="xsd:string">thn__Resource__c</value>
     </values>
     <values>
+        <field>Event_Second_Parent_Resource_API_Field__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
         <field>Event_Start_Date_API_Field__c</field>
         <value xsi:type="xsd:string">thn__Start_Date_Time__c</value>
     </values>
     <values>
         <field>Event_Status_API_Field__c</field>
         <value xsi:type="xsd:string">thn__Reservation_Status__c</value>
+    </values>
+    <values>
+        <field>Event_Style_API_Field__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Event_Tooltip_Fields__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Hotel_API_Name__c</field>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Resource_API_Name__c</field>
@@ -67,6 +87,14 @@
         <value xsi:type="xsd:string">Name</value>
     </values>
     <values>
+        <field>Resource_Hidden_Columns_API_Fields__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Resource_Hotel_API_Name__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
         <field>Resource_Icon_API_Field__c</field>
         <value xsi:type="xsd:string">thn__Icon__c</value>
     </values>
@@ -75,8 +103,44 @@
         <value xsi:type="xsd:string">fas fa-home</value>
     </values>
     <values>
+        <field>Resource_Maintenance_API_Name__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Resource_Maintenance_End_API_Field__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Resource_Maintenance_Resource_API_Field__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Resource_Maintenance_Start_API_Field__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
         <field>Resource_Name_API_Field__c</field>
         <value xsi:type="xsd:string">Name</value>
+    </values>
+    <values>
+        <field>Resource_Opening_Hours_API_Name__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Resource_Opening_Hours_Days_API_Field__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Resource_Opening_Hours_End_Time__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Resource_Opening_Hours_Resource__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Resource_Opening_Hours_Start_Time__c</field>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Resource_Order_Rule__c</field>
@@ -85,5 +149,33 @@
     <values>
         <field>Resource_Parent_Resource_API_Field__c</field>
         <value xsi:type="xsd:string">thn__Parent_Resource__c</value>
+    </values>
+    <values>
+        <field>Resource_Type_API_Name__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Time_Range_API_Name__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Time_Range_Color_API_Field__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Time_Range_End_Date_API_Field__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Time_Range_Icon_API_Field__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Time_Range_Name_API_Field__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Time_Range_Start_Date_API_Field__c</field>
+        <value xsi:nil="true"/>
     </values>
 </CustomMetadata>

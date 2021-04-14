@@ -64,7 +64,7 @@
     </values>
     <values>
         <field>Event_Tooltip_Fields__c</field>
-        <value xsi:nil="true"/>
+        <value xsi:type="xsd:string">CreatedDate,Name</value>
     </values>
     <values>
         <field>Hotel_API_Name__c</field>
