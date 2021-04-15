@@ -47,6 +47,10 @@
         <value xsi:type="xsd:string">thn__Resource__c</value>
     </values>
     <values>
+        <field>Event_Previous_Event_API_Field__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
         <field>Event_Second_Parent_Resource_API_Field__c</field>
         <value xsi:nil="true"/>
     </values>
@@ -101,6 +105,10 @@
     <values>
         <field>Resource_Icon__c</field>
         <value xsi:type="xsd:string">fas fa-home</value>
+    </values>
+    <values>
+        <field>Resource_Image_API_FIeld__c</field>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Resource_Maintenance_API_Name__c</field>
