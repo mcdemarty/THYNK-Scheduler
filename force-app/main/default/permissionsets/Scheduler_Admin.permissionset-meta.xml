@@ -280,6 +280,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>SP_Event__c.Previous_Event__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>SP_Event__c.Second_Parent_Resource__c</field>
         <readable>false</readable>
     </fieldPermissions>
@@ -347,6 +352,11 @@
         <editable>true</editable>
         <field>SP_Resource__c.Icon__c</field>
         <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>SP_Resource__c.Image__c</field>
+        <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
