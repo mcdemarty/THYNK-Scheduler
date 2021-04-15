@@ -47,6 +47,10 @@
         <value xsi:type="xsd:string">Parent_Resource__c</value>
     </values>
     <values>
+        <field>Event_Previous_Event_API_Field__c</field>
+        <value xsi:type="xsd:string">Previous_Event__c</value>
+    </values>
+    <values>
         <field>Event_Second_Parent_Resource_API_Field__c</field>
         <value xsi:nil="true"/>
     </values>
@@ -64,7 +68,7 @@
     </values>
     <values>
         <field>Event_Tooltip_Fields__c</field>
-        <value xsi:nil="true"/>
+        <value xsi:type="xsd:string">CreatedDate,Name</value>
     </values>
     <values>
         <field>Hotel_API_Name__c</field>
@@ -101,6 +105,10 @@
     <values>
         <field>Resource_Icon__c</field>
         <value xsi:type="xsd:string">b-fa b-fa-home</value>
+    </values>
+    <values>
+        <field>Resource_Image_API_FIeld__c</field>
+        <value xsi:type="xsd:string">Image__c</value>
     </values>
     <values>
         <field>Resource_Maintenance_API_Name__c</field>

@@ -22,3 +22,5 @@ SP_Resource_Main__c.All
 force-app/main/default/profiles
 force-app/main/default/objectTranslations
 force-app/main/default/flexipages
+force-app/main/default/objects/Account
+force-app/main/default/objects/Contact

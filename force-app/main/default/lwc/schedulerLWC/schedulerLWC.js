@@ -23,6 +23,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	@api responsiveType;
 	@api showFieldNamesWhenHovered;
 	@api columnsOnRight;
+	@api columnsAutoHeight;
 
 	// Style attributes
 
@@ -87,7 +88,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		])
 			.then(() => {
 				setTimeout(() => {
-					bryntum.schedulerpro.init(this.template.querySelector('.scheduler-init-container'));
+					// bryntum.schedulerpro.init(this.template.querySelector('.scheduler-init-container'));
 
 					this.initializeCustomSchedulerStyle();
 
@@ -130,7 +131,9 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		this.customEndDate = schedulerPreset.endDate;
 
 		this.minSelectableEndDate = this.startDate;
-		this.maxSelectableStartDate = this.endDate;
+		this.maxSelectableStartDate = new Date(this.endDate);
+		this.maxSelectableStartDate.setDate(this.maxSelectableStartDate.getDate() - 1);
+		this.maxSelectableStartDate = this.maxSelectableStartDate.toISOString();
 
 		this.saveSchedulerState();
 
@@ -176,6 +179,17 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 						data: this.collapseResourcesFromState(this.mergeResourceRecords(extensibleResult.resources), schedulerIndex)
 					});
 
+					const dependenciesData = [];
+
+					extensibleResult.events.map(event => {
+						if (event.previousEvent) {
+							dependenciesData.push({
+								fromEvent: event.previousEvent,
+								toEvent: event.id
+							});
+						}
+					});
+
 					const eventStore = new bryntum.schedulerpro.EventStore({
 						data: this.mergeEventRecords(extensibleResult.events)
 					});
@@ -207,6 +221,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 					for (let i = 0; i < columns.length; i++) {
 						columns[i].region = this.columnsOnRight ? 'right' : 'left';
+						columns[i].autoHeight = this.columnsAutoHeight;
 					}
 
 					for (let i = 0; i < columnsWidth.length; i++) {
@@ -214,6 +229,23 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 					}
 
 					extensibleResult.resourceColumns[0].type = 'tree';
+					extensibleResult.resourceColumns[0].renderer = (event) => {
+						const field = event.dataField.dataSource;
+						let value = this.getNestedFieldValue(event.record[field], event.record, field);
+
+						if (event.record.imageUrl) {
+							if (!event.cellElement.querySelector('.b-tree-cell-value img') && event.cellElement.querySelector('.b-tree-cell-value')) {
+								const div = document.createElement('div');
+								div.innerHTML = `<img draggable="false" style="max-width: none; height: 55px; user-select: none" src="${event.record.imageUrl}"/>`
+
+								div.style = 'height: 40px; width: 40px; overflow: hidden; border-radius: 50%; margin-right: 0.5rem';
+
+								event.cellElement.querySelector('.b-tree-cell-value').insertBefore(div, event.cellElement.querySelector('.b-tree-cell-value').childNodes[0]);
+							}
+						}
+
+						return value;
+					}
 
 					let filter = this.enableColumnFiltering || false;
 					if (filter) {
@@ -230,6 +262,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 						filter = filters;
 					}
+
+					console.log(dependenciesData);
 
 					let schedulerOptions = {
 						appendTo: this.template.querySelector('.scheduler-container'),
@@ -250,7 +284,6 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 							eventDragCreate: false,
 							contextMenu: false,
 							enableEventAnimations: false,
-							dependencies: false,
 							resourceTimeRanges: true,
 							timeRanges: true,
 							filter: this.responsiveType !== 'Small' ? filter : false,
@@ -260,6 +293,10 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 							// eventDrag: {
 							// 	constrainDragToTimeline: false
 							// },
+
+							dependencies: {
+								allowCreate: false
+							},
 
 							timeAxisHeaderMenu: {
 								items: {
@@ -286,21 +323,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 									let template = '';
 
 									extensibleResult.eventTooltipFields.map(field => {
-										let value = event.eventRecord[field];
-										let currentObjectLevel = event.eventRecord;
-
-										if (field.includes('.')) {
-											const fieldParts = field.split('.');
-											let i = 0;
-
-											while (typeof currentObjectLevel === 'object' && currentObjectLevel != null) {
-												currentObjectLevel = currentObjectLevel[fieldParts[i]];
-
-												i++;
-											}
-
-											value = currentObjectLevel;
-										}
+										const value = this.getNestedFieldValue(event.eventRecord[field], event.eventRecord, field);
 
 										if (this.showFieldNamesWhenHovered) {
 											value = extensibleResult.eventTooltipFieldsNames[field] + ': ' + value;
@@ -324,6 +347,9 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 						timeRanges: [].concat(extensibleResult.timeRanges),
 						assignmentStore: new bryntum.schedulerpro.AssignmentStore({
 							data: assignments
+						}),
+						dependencyStore: new bryntum.schedulerpro.DependencyStore({
+							data: dependenciesData
 						}),
 
 						listeners: {
@@ -606,6 +632,10 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			const result = [];
 
 			resources.map(resource => {
+				if (!resource.imageUrl) {
+					resource.image = false;
+				}
+
 				let newResource = Object.assign(resource, resource.resourceRecord);
 				delete newResource.resourceRecord;
 
@@ -849,6 +879,27 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 			this.relatedComponent.initScheduler(true);
 		}, 1000);
+	}
+
+	getNestedFieldValue(value, currentObjectLevel, field) {
+		if (field.includes('.')) {
+			const fieldParts = field.split('.');
+			let i = 0;
+
+			while (typeof currentObjectLevel === 'object' && currentObjectLevel != null) {
+				currentObjectLevel = currentObjectLevel[fieldParts[i]];
+
+				i++;
+			}
+
+			value = currentObjectLevel;
+		}
+
+		if (value && value.match && value.match(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d.\d{3}Z$/)) {
+			value = new Date(value).toLocaleString();
+		}
+
+		return value;
 	}
 
 	showErrorToast(message) {
