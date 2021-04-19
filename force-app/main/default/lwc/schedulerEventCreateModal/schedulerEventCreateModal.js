@@ -22,6 +22,14 @@ export default class SchedulerEventCreateModal extends LightningElement {
 		this.showSpinner = false;
 	}
 
+	@api setFieldValue(field, value) {
+		const node = this.template.querySelector('lightning-input-field.' + field);
+
+		if (node) {
+			node.value = value;
+		}
+	}
+
 	hideModal() {
 		this.modalVisible = false;
 	}

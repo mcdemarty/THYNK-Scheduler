@@ -10,7 +10,7 @@
 						<lightning-spinner if:true={showSpinner} variant="brand" alternative-text="Loading"></lightning-spinner>
 						<lightning-messages></lightning-messages>
 						<template for:each={fields} for:item="field">
-							<lightning-input-field key={field} field-name={field}></lightning-input-field>
+							<lightning-input-field key={field} field-name={field} class={field}></lightning-input-field>
 						</template>
 					</div>
 					<footer class="slds-modal__footer">

@@ -510,6 +510,8 @@ public without sharing class SchedulerControllerV2 {
 		public String iconCls;
 		@AuraEnabled
 		public String imageUrl;
+		@AuraEnabled
+		public Boolean bookable;
 
 		@AuraEnabled
 		public List<SchedulerEvent> events = new List<SchedulerEvent>();
@@ -523,6 +525,7 @@ public without sharing class SchedulerControllerV2 {
 			id = resource.Id;
 			name = String.valueOf(getSafeFieldValue(schedulerFields.Resource_Name_API_Field__c, resource));
 			imageUrl = String.valueOf(getSafeFieldValue(schedulerFields.Resource_Image_API_Field__c, resource));
+			bookable = Boolean.valueOf(getSafeFieldValue(schedulerFields.Resource_Bookable_API_Field__c, resource));
 
 			if (getSafeFieldValue(schedulerFields.Resource_Parent_Resource_API_Field__c, resource) != null) {
 				parentResource = String.valueOf(getSafeFieldValue(schedulerFields.Resource_Parent_Resource_API_Field__c, resource));

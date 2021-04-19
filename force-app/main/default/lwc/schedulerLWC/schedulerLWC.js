@@ -88,7 +88,35 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		])
 			.then(() => {
 				setTimeout(() => {
-					// bryntum.schedulerpro.init(this.template.querySelector('.scheduler-init-container'));
+					try {
+						const { Widget } = bryntum;
+						const { DomHelper } = bryntum.schedulerpro;
+
+						const descriptor = Object.getOwnPropertyDescriptor(Widget.prototype, 'floatRoot');
+						const old = descriptor.get;
+
+						Object.defineProperty(Widget.prototype, 'floatRoot', {
+							get : function() {
+								const
+									me          = this,
+									rootElement = me.rootElement || me.owner?.rootElement;
+
+								let { floatRoot } = rootElement;
+
+								if (!floatRoot) {
+									floatRoot = old.call(this);
+								}
+								// element.contains is broken for nodes that we do not control
+								else if (DomHelper.getRootElement(floatRoot) !== rootElement) {
+									rootElement.appendChild(floatRoot);
+								}
+
+								return floatRoot;
+							}
+						});
+					} catch (e) {
+						console.log(e);
+					}
 
 					this.initializeCustomSchedulerStyle();
 
@@ -263,8 +291,6 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 						filter = filters;
 					}
 
-					console.log(dependenciesData);
-
 					let schedulerOptions = {
 						appendTo: this.template.querySelector('.scheduler-container'),
 
@@ -288,11 +314,35 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 							timeRanges: true,
 							filter: this.responsiveType !== 'Small' ? filter : false,
 							stripe: true,
-							scheduleMenu: false,
 							cellMenu: false,
-							// eventDrag: {
-							// 	constrainDragToTimeline: false
-							// },
+							eventDrag: {
+								constrainDragToTimeline: false
+							},
+
+							scheduleMenu: {
+								processItems: ({date, resourceRecord, items}) => {
+									if (!resourceRecord.bookable) {
+										return false;
+									}
+
+									items.addEvent = false;
+
+									items.extraItem = {
+										text: 'Add Event',
+										icon: 'b-fa b-fa-plus',
+										onItem: ({date, resourceRecord, items}) => {
+											this.createEventClickHandler();
+
+											setTimeout(() => {
+												const modal = this.template.querySelector('.scheduler-event-create-modal');
+
+												modal.setFieldValue(extensibleResult.eventStartDateFieldAPIName, new Date(date).toISOString());
+												modal.setFieldValue(extensibleResult.eventParentResourceFieldAPIName, resourceRecord.id);
+											}, 0);
+										}
+									}
+								}
+							},
 
 							dependencies: {
 								allowCreate: false
@@ -323,7 +373,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 									let template = '';
 
 									extensibleResult.eventTooltipFields.map(field => {
-										const value = this.getNestedFieldValue(event.eventRecord[field], event.eventRecord, field);
+										let value = this.getNestedFieldValue(event.eventRecord[field], event.eventRecord, field);
 
 										if (this.showFieldNamesWhenHovered) {
 											value = extensibleResult.eventTooltipFieldsNames[field] + ': ' + value;
@@ -361,6 +411,12 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 							// timeAxisChange: this.timeAxisChangeHandler
 						}
 					}
+
+					// if (this.schedulers[schedulerIndex - 1]) {
+					// 	schedulerOptions = Object.assign(schedulerOptions, {
+					// 		partner: this.schedulers[schedulerIndex - 1]
+					// 	});
+					// }
 
 					schedulerOptions = Object.assign(schedulerOptions, schedulerPreset);
 
