@@ -54,6 +54,8 @@
             
             <property name="columnsAutoHeight" type="Boolean" label="Columns Auto Height"/>
             
+            <property name="useOverbookingFlow" type="Boolean" label="Use overbooking flow"/>
+            
 
             <property name="headingFont" type="String" label="Heading Font"/>
             

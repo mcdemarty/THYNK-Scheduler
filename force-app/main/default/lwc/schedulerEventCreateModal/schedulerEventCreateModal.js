@@ -1,10 +1,15 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent'
+import { subscribe, unsubscribe, APPLICATION_SCOPE, publish, MessageContext } from 'lightning/messageService';
+import schedulerEventChanged from '@salesforce/messageChannel/SchedulerEventChanged__c';
 import isResourceBookable from '@salesforce/apex/SchedulerControllerV2.isResourceBookable';
 import getMaintenanceTimeRanges from '@salesforce/apex/SchedulerControllerV2.getMaintenanceTimeRanges';
 import getTimeRanges from '@salesforce/apex/SchedulerControllerV2.getTimeRanges';
 
 export default class SchedulerEventCreateModal extends LightningElement {
+
+	@wire(MessageContext)
+	messageContext;
 
 	modalVisible = false;
 	showSpinner = false;
@@ -16,6 +21,7 @@ export default class SchedulerEventCreateModal extends LightningElement {
 	@api eventParentResourceFieldName;
 	@api eventStartDateFieldName;
 	@api eventEndDateFieldName;
+	@api useOverbookingFlow;
 
 	@api showModal() {
 		this.modalVisible = true;
@@ -81,7 +87,21 @@ export default class SchedulerEventCreateModal extends LightningElement {
 			});
 	}
 
-	formSuccessHandler() {
+	formSuccessHandler(event) {
+		if (this.useOverbookingFlow) {
+			const fields = event.detail.fields;
+
+			publish(this.messageContext, schedulerEventChanged, {
+				eventId: event.detail.id,
+				resourceId: fields[this.eventParentResourceFieldName].value,
+				startDate: fields[this.eventStartDateFieldName].value,
+				endDate: fields[this.eventEndDateFieldName].value,
+				resourceChanged: true,
+				propertyId: fields.thn__Property__c.value,
+				isCreate: true
+			});
+		}
+
 		this.hideModal();
 
 		this.showSpinner = false;

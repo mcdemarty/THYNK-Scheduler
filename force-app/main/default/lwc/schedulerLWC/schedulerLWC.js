@@ -1,13 +1,18 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, wire } from 'lwc';
 import { loadScript, loadStyle } from "lightning/platformResourceLoader";
 import { ShowToastEvent } from 'lightning/platformShowToastEvent'
 import { NavigationMixin } from 'lightning/navigation';
+import { subscribe, unsubscribe, APPLICATION_SCOPE, publish, MessageContext } from 'lightning/messageService';
+import schedulerEventChanged from '@salesforce/messageChannel/SchedulerEventChanged__c';
 import getSchedulerData from '@salesforce/apex/SchedulerControllerV2.getSchedulerData';
 import saveEvent from '@salesforce/apex/SchedulerControllerV2.saveEvent';
 
 import SCHEDULER from '@salesforce/resourceUrl/Scheduler';
 
 export default class SchedulerLwc extends NavigationMixin(LightningElement) {
+
+	@wire(MessageContext)
+	messageContext;
 
 	@api schedulerFieldsMetadataName;
 	@api secondSchedulerFieldsMetadataName;
@@ -24,6 +29,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	@api showFieldNamesWhenHovered;
 	@api columnsOnRight;
 	@api columnsAutoHeight;
+
+	@api useOverbookingFlow;
 
 	// Style attributes
 
@@ -129,7 +136,20 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 				console.error(e);
 				this.errorMessage = e.message || e.body.message;
 				this.showSpinner = false;
-			})
+			});
+
+		subscribe(
+			this.messageContext,
+			schedulerEventChanged,
+			message => {
+				if (message.isSchedulerUpdate) {
+					this.initScheduler();
+				}
+			},
+			{
+				scope: APPLICATION_SCOPE
+			}
+		)
 	}
 
 	// Init actions
@@ -473,8 +493,6 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	}
 
 	saveSchedulerState() {
-
-
 		const state = JSON.parse(window.localStorage.getItem(window.location + '-SC')) || {};
 
 		state.preset = this.currentViewPreset;
@@ -882,6 +900,19 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		}
 
 		const fieldMappingMetadataName = this.schedulerIndex === 0 ? this.relatedComponent.schedulerFieldsMetadataName : this.relatedComponent.secondSchedulerFieldsMetadataName;
+
+		if (this.relatedComponent.useOverbookingFlow) {
+			publish(this.relatedComponent.messageContext, schedulerEventChanged, {
+				eventId: changedRecord.id,
+				resourceId: changedRecord.resourceId,
+				startDate: changedRecord.startDate,
+				endDate: changedRecord.endDate,
+				resourceChanged: true,
+				propertyId: changedRecord.property
+			});
+
+			return;
+		}
 
 		saveEvent({
 			fieldMappingMetadataName: fieldMappingMetadataName,

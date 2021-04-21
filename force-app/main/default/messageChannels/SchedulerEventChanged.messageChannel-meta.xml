@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Scheduler Event Changed</description>
+    <isExposed>true</isExposed>
+    <lightningMessageFields>
+        <fieldName>eventId</fieldName>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>resourceId</fieldName>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>startDate</fieldName>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>endDate</fieldName>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>resourceChanged</fieldName>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>isSchedulerUpdate</fieldName>
+    </lightningMessageFields>
+    <masterLabel>SampleMessageChannel</masterLabel>
+</LightningMessageChannel>

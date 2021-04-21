@@ -105,7 +105,8 @@ public without sharing class SchedulerControllerV2 {
 		Set<String> fieldsToRetrieve = new Set<String> {
 			schedulerFields.Resource_Name_API_Field__c,
 			schedulerFields.Resource_Parent_Resource_API_Field__c,
-			schedulerFields.Resource_Icon_API_Field__c
+			schedulerFields.Resource_Icon_API_Field__c,
+			schedulerFields.Resource_Bookable_API_Field__c
 		};
 
 		if (!String.isEmpty(schedulerFields.Resource_Display_Columns_API_Fields__c)) {
@@ -260,6 +261,10 @@ public without sharing class SchedulerControllerV2 {
 
 		Map<String, SObjectType> schemaGlobalDescribeResult = Schema.getGlobalDescribe();
 
+		if (schemaGlobalDescribeResult.get(schedulerFields.Event_API_Name__c).getDescribe().fields.getMap().containsKey('thn__Property__c')) {
+			fieldsToRetrieve.add('thn__Property__c');
+		}
+
 		if (!schemaGlobalDescribeResult.containsKey(schedulerFields.Event_API_Name__c)) {
 			throw new SchedulerFieldMappingException('Event object ' + schedulerFields.Event_API_Name__c + ' not found');
 		}
@@ -296,6 +301,10 @@ public without sharing class SchedulerControllerV2 {
 	public static List<SchedulerResourceMaintenance> getMaintenanceTimeRanges(String fieldMappingMetadataName, Datetime startTime, Datetime endTime, List<Id> resources) {
 		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
+		if (schedulerFields.Resource_Maintenance_API_Name__c == null) {
+			return new List<SchedulerResourceMaintenance>();
+		}
+
 		Set<String> fieldsToRetrieve = new Set<String> {
 			schedulerFields.Resource_Maintenance_Start_API_Field__c,
 			schedulerFields.Resource_Maintenance_End_API_Field__c,
@@ -328,6 +337,10 @@ public without sharing class SchedulerControllerV2 {
 	public static List<SchedulerTimeRange> getTimeRanges(String fieldMappingMetadataName, Datetime startTime, Datetime endTime) {
 		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
+		if (schedulerFields.Time_Range_API_Name__c == null) {
+			return new List<SchedulerTimeRange>();
+		}
+
 		Set<String> fieldsToRetrieve = new Set<String> {
 			schedulerFields.Time_Range_Start_Date_API_Field__c,
 			schedulerFields.Time_Range_End_Date_API_Field__c,
@@ -356,6 +369,11 @@ public without sharing class SchedulerControllerV2 {
 		}
 
 		return result;
+	}
+
+	@AuraEnabled
+	public static void deleteEvent(Id eventId) {
+		delete eventId.getSobjectType().newSObject(eventId);
 	}
 
 	private static Scheduler_Fields__mdt getSchedulerFieldMapping(String fieldMappingMetadataName) {
@@ -392,7 +410,7 @@ public without sharing class SchedulerControllerV2 {
 		return (SchedulerControllerV2.class.getName().contains('.') ? SchedulerControllerV2.class.getName().substringBefore('.') + '__' : '') + name;
 	}
 
-	private static SObjectField checkFieldValidity(String fieldPath, SObjectType sObjectType) {
+	public static SObjectField checkFieldValidity(String fieldPath, SObjectType sObjectType) {
 		if (!fieldPath.contains('.')) {
 			if (sObjectType.getDescribe().fields.getMap().containsKey(fieldPath)) {
 				if (sObjectType.getDescribe().fields.getMap().get(fieldPath).getDescribe().isAccessible()) {
@@ -566,6 +584,8 @@ public without sharing class SchedulerControllerV2 {
 		public SObject eventRecord;
 		@AuraEnabled
 		public Id previousEvent;
+		@AuraEnabled
+		public Id property;
 
 		public SchedulerEvent(SObject event, Scheduler_Fields__mdt schedulerFields) {
 			id = event.Id;
@@ -576,6 +596,7 @@ public without sharing class SchedulerControllerV2 {
 			resourceId = String.valueOf(getSafeFieldValue(schedulerFields.Event_Parent_Resource_API_Field__c, event));
 			secondResourceId = String.valueOf(getSafeFieldValue(schedulerFields.Event_Second_Parent_Resource_API_Field__c, event));
 			previousEvent = String.valueOf(getSafeFieldValue(schedulerFields.Event_Previous_Event_API_Field__c, event));
+			property = String.valueOf(getSafeFieldValue('thn__Property__c', event));
 
 			if (getSafeFieldValue(schedulerFields.Event_Color_API_Field__c, event) != null) {
 				eventColor = String.valueOf(getSafeFieldValue(schedulerFields.Event_Color_API_Field__c, event));
@@ -640,8 +661,8 @@ public without sharing class SchedulerControllerV2 {
 
 			style = String.format('opacity: 0.7; background: repeating-linear-gradient(-55deg, #ddd, #ddd 10px, {0} 5px, {0} 20px);', new List<String> {
 				String.isEmpty(String.valueOf(timeRange.get(schedulerFields.Time_Range_Color_API_Field__c))) ?
-				'#eee' :
-				String.valueOf(timeRange.get(schedulerFields.Time_Range_Color_API_Field__c))
+					'#eee' :
+					String.valueOf(timeRange.get(schedulerFields.Time_Range_Color_API_Field__c))
 			});
 		}
 	}
