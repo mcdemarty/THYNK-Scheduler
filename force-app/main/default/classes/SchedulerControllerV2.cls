@@ -147,14 +147,10 @@ public without sharing class SchedulerControllerV2 {
 
 		Map<Id, SchedulerResource> resources = new Map<Id, SchedulerResource>();
 
-		for (SObject resource : queriedResources) {
-			SchedulerResource schedulerResource = new SchedulerResource(resource, schedulerFields);
+		List<SObject> unparsedResources = putResourcesToStructure(queriedResources, schedulerFields, resources);
 
-			resources.put(resource.Id, schedulerResource);
-
-			if (schedulerResource.parentResource != null) {
-				resources.get(schedulerResource.parentResource).children.add(schedulerResource);
-			}
+		while (!unparsedResources.isEmpty()) {
+			unparsedResources = putResourcesToStructure(queriedResources, schedulerFields, resources);
 		}
 
 		Set<Id> resourceKeys = resources.keySet();
@@ -166,6 +162,28 @@ public without sharing class SchedulerControllerV2 {
 		}
 
 		return new List<SchedulerResource>(resources.values());
+	}
+
+	private static List<SObject> putResourcesToStructure(List<SObject> queriedResources, Scheduler_Fields__mdt schedulerFields, Map<Id, SchedulerResource> resources) {
+		List<SObject> unparsedResources = new List<SObject>();
+
+		for (SObject resource : queriedResources) {
+			SchedulerResource schedulerResource = new SchedulerResource(resource, schedulerFields);
+
+			if (schedulerResource.parentResource != null && resources.get(schedulerResource.parentResource) == null) {
+				unparsedResources.add(resource);
+
+				continue;
+			}
+
+			resources.put(resource.Id, schedulerResource);
+
+			if (schedulerResource.parentResource != null) {
+				resources.get(schedulerResource.parentResource).children.add(schedulerResource);
+			}
+		}
+
+		return unparsedResources;
 	}
 
 	private static List<ResourceColumn> getResourceColumns(String fieldMappingMetadataName) {
@@ -661,8 +679,8 @@ public without sharing class SchedulerControllerV2 {
 
 			style = String.format('opacity: 0.7; background: repeating-linear-gradient(-55deg, #ddd, #ddd 10px, {0} 5px, {0} 20px);', new List<String> {
 				String.isEmpty(String.valueOf(timeRange.get(schedulerFields.Time_Range_Color_API_Field__c))) ?
-					'#eee' :
-					String.valueOf(timeRange.get(schedulerFields.Time_Range_Color_API_Field__c))
+				'#eee' :
+				String.valueOf(timeRange.get(schedulerFields.Time_Range_Color_API_Field__c))
 			});
 		}
 	}

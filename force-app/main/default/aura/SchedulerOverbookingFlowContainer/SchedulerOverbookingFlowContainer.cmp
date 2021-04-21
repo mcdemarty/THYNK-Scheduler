@@ -4,7 +4,7 @@
 	<aura:attribute name="isCreate" type="Boolean" default="false"/>
 	<aura:attribute name="eventId" type="String" default="false"/>
 
-	<lightning:messageChannel type="SchedulerEventChanged__c" onMessage="{!c.onMessage}" scope="APPLICATION" aura:id="messageServiceContainer"/>
+	<lightning:messageChannel type="thn__SchedulerEventChanged__c" onMessage="{!c.onMessage}" scope="APPLICATION" aura:id="messageServiceContainer"/>
 
 	<aura:if isTrue="{!v.showModal}">
 		<section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">

@@ -70,6 +70,12 @@
 					});
 
 					$A.enqueueAction(action);
+				} else {
+					component.set('v.showModal', false);
+
+					component.find('messageServiceContainer').publish({
+						isSchedulerUpdate: true
+					});
 				}
 			} else {
 				component.set('v.showModal', false);
