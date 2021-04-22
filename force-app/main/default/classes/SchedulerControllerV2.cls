@@ -144,13 +144,60 @@ public without sharing class SchedulerControllerV2 {
 		}
 
 		List<SObject> queriedResources = Database.query(query);
-
 		Map<Id, SchedulerResource> resources = new Map<Id, SchedulerResource>();
+		Map<Id, ResourcePath> resourcesPaths = new Map<Id, ResourcePath>();
 
-		List<SObject> unparsedResources = putResourcesToStructure(queriedResources, schedulerFields, resources);
+		for (SObject resource : queriedResources) {
+			SchedulerResource schedulerResource = new SchedulerResource(resource, schedulerFields);
 
-		while (!unparsedResources.isEmpty()) {
-			unparsedResources = putResourcesToStructure(queriedResources, schedulerFields, resources);
+			resources.put(resource.Id, schedulerResource);
+		}
+
+		for (SchedulerResource resource : resources.values()) {
+			if (resource.parentResource != null) {
+				SchedulerResource currentResource = resource;
+
+				while (currentResource.parentResource != null) {
+					if (resourcesPaths.containsKey(resource.id)) {
+						resourcesPaths.put(resource.id, new ResourcePath(resource.id, currentResource.parentResource + '_' + resourcesPaths.get(resource.id).path));
+					} else {
+						resourcesPaths.put(resource.id, new ResourcePath(resource.id, currentResource.parentResource));
+					}
+
+					currentResource = resources.get(currentResource.parentResource);
+				}
+			} else {
+				resourcesPaths.put(resource.id, new ResourcePath(resource.id, ''));
+			}
+		}
+
+		List<ResourcePath> sortedResourcePaths = new List<ResourcePath>(resourcesPaths.values());
+		sortedResourcePaths.sort();
+
+		for (ResourcePath resourcePath : sortedResourcePaths) {
+			if (String.isEmpty(resourcePath.path)) {
+				continue;
+			}
+
+			List<String> path = resourcePath.path.split('_');
+
+			SchedulerResource currentResource = resources.get(path[0]);
+
+			for (Integer i = 0; i < path.size(); i++) {
+				if (i == 0) {
+					currentResource = resources.get(path[i]);
+					continue;
+				}
+
+				for (SchedulerResource childResource : currentResource.children) {
+					if (childResource.id == path[i]) {
+						currentResource = childResource;
+						break;
+					}
+				}
+			}
+
+			currentResource.children.add(resources.get(resourcePath.resourceId));
 		}
 
 		Set<Id> resourceKeys = resources.keySet();
@@ -162,28 +209,6 @@ public without sharing class SchedulerControllerV2 {
 		}
 
 		return new List<SchedulerResource>(resources.values());
-	}
-
-	private static List<SObject> putResourcesToStructure(List<SObject> queriedResources, Scheduler_Fields__mdt schedulerFields, Map<Id, SchedulerResource> resources) {
-		List<SObject> unparsedResources = new List<SObject>();
-
-		for (SObject resource : queriedResources) {
-			SchedulerResource schedulerResource = new SchedulerResource(resource, schedulerFields);
-
-			if (schedulerResource.parentResource != null && resources.get(schedulerResource.parentResource) == null) {
-				unparsedResources.add(resource);
-
-				continue;
-			}
-
-			resources.put(resource.Id, schedulerResource);
-
-			if (schedulerResource.parentResource != null) {
-				resources.get(schedulerResource.parentResource).children.add(schedulerResource);
-			}
-		}
-
-		return unparsedResources;
 	}
 
 	private static List<ResourceColumn> getResourceColumns(String fieldMappingMetadataName) {
@@ -614,7 +639,10 @@ public without sharing class SchedulerControllerV2 {
 			resourceId = String.valueOf(getSafeFieldValue(schedulerFields.Event_Parent_Resource_API_Field__c, event));
 			secondResourceId = String.valueOf(getSafeFieldValue(schedulerFields.Event_Second_Parent_Resource_API_Field__c, event));
 			previousEvent = String.valueOf(getSafeFieldValue(schedulerFields.Event_Previous_Event_API_Field__c, event));
-			property = String.valueOf(getSafeFieldValue('thn__Property__c', event));
+
+			if (event.getSObjectType().getDescribe().fields.getMap().containsKey('thn__Property__c')) {
+				property = String.valueOf(getSafeFieldValue('thn__Property__c', event));
+			}
 
 			if (getSafeFieldValue(schedulerFields.Event_Color_API_Field__c, event) != null) {
 				eventColor = String.valueOf(getSafeFieldValue(schedulerFields.Event_Color_API_Field__c, event));
@@ -679,8 +707,8 @@ public without sharing class SchedulerControllerV2 {
 
 			style = String.format('opacity: 0.7; background: repeating-linear-gradient(-55deg, #ddd, #ddd 10px, {0} 5px, {0} 20px);', new List<String> {
 				String.isEmpty(String.valueOf(timeRange.get(schedulerFields.Time_Range_Color_API_Field__c))) ?
-				'#eee' :
-				String.valueOf(timeRange.get(schedulerFields.Time_Range_Color_API_Field__c))
+					'#eee' :
+					String.valueOf(timeRange.get(schedulerFields.Time_Range_Color_API_Field__c))
 			});
 		}
 	}
@@ -700,6 +728,20 @@ public without sharing class SchedulerControllerV2 {
 		public Boolean editor = false;
 		@AuraEnabled
 		public String type;
+	}
+
+	public class ResourcePath implements Comparable {
+		public String path;
+		public Id resourceId;
+
+		public ResourcePath(Id resourceId, String path) {
+			this.resourceId = resourceId;
+			this.path = path;
+		}
+
+		public Integer compareTo(Object anotherPath) {
+			return path.length() - ((ResourcePath)anotherPath).path.length();
+		}
 	}
 
 	public class SchedulerFieldMappingException extends Exception {}
