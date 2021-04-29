@@ -1,6 +1,6 @@
 public without sharing class SchedulerControllerV2 {
 
-	private static Scheduler_Fields__mdt schedulerFieldMapping;
+	private static Scheduler_Fields_V2__mdt schedulerFieldMapping;
 
 	@AuraEnabled(Cacheable=false)
 	public static SchedulerData getSchedulerData(String fieldMappingMetadataName, Datetime startDate, Datetime endDate, String eventCustomFilter, String resourceCustomFilter, String resourceOrderRule) {
@@ -8,7 +8,7 @@ public without sharing class SchedulerControllerV2 {
 			throw new SchedulerException('No permissions to access the Scheduler');
 		}
 
-		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
+		Scheduler_Fields_V2__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
 		SchedulerData schedulerData = new SchedulerData();
 
@@ -52,7 +52,7 @@ public without sharing class SchedulerControllerV2 {
 	@AuraEnabled
 	public static void saveEvent(String fieldMappingMetadataName, String eventJSON) {
 		SchedulerEvent event = (SchedulerEvent)JSON.deserialize(eventJSON, SchedulerEvent.class);
-		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
+		Scheduler_Fields_V2__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
 		if (!Schema.getGlobalDescribe().get(schedulerFields.Event_API_Name__c).getDescribe().isCreateable()) {
 			throw new SchedulerFieldMappingException('Not enough permissions to create ' + schedulerFields.Event_API_Name__c + ' record');
@@ -89,7 +89,7 @@ public without sharing class SchedulerControllerV2 {
 
 	@AuraEnabled
 	public static Boolean isResourceBookable(String fieldMappingMetadataName, Id resourceId) {
-		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
+		Scheduler_Fields_V2__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
 		List<SObject> resources = Database.query(String.format('SELECT {0} FROM {1} WHERE Id = :resourceId', new List<String> {
 			schedulerFields.Resource_Bookable_API_Field__c,
@@ -100,7 +100,7 @@ public without sharing class SchedulerControllerV2 {
 	}
 
 	private static List<SchedulerResource> getResources(String fieldMappingMetadataName, String resourceCustomFilter, String resourceOrderRule) {
-		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
+		Scheduler_Fields_V2__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
 		Set<String> fieldsToRetrieve = new Set<String> {
 			schedulerFields.Resource_Name_API_Field__c,
@@ -212,7 +212,7 @@ public without sharing class SchedulerControllerV2 {
 	}
 
 	private static List<ResourceColumn> getResourceColumns(String fieldMappingMetadataName) {
-		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
+		Scheduler_Fields_V2__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
 		List<ResourceColumn> columns = new List<ResourceColumn>();
 
@@ -265,7 +265,7 @@ public without sharing class SchedulerControllerV2 {
 	}
 
 	private static List<SchedulerEvent> getEvents(String fieldMappingMetadataName, Datetime startTime, Datetime endTime, String eventCustomFilter) {
-		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
+		Scheduler_Fields_V2__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
 		Set<String> fieldsToRetrieve = new Set<String> {
 			schedulerFields.Event_Start_Date_API_Field__c,
@@ -342,7 +342,7 @@ public without sharing class SchedulerControllerV2 {
 
 	@AuraEnabled
 	public static List<SchedulerResourceMaintenance> getMaintenanceTimeRanges(String fieldMappingMetadataName, Datetime startTime, Datetime endTime, List<Id> resources) {
-		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
+		Scheduler_Fields_V2__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
 		if (schedulerFields.Resource_Maintenance_API_Name__c == null) {
 			return new List<SchedulerResourceMaintenance>();
@@ -378,7 +378,7 @@ public without sharing class SchedulerControllerV2 {
 
 	@AuraEnabled
 	public static List<SchedulerTimeRange> getTimeRanges(String fieldMappingMetadataName, Datetime startTime, Datetime endTime) {
-		Scheduler_Fields__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
+		Scheduler_Fields_V2__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
 		if (schedulerFields.Time_Range_API_Name__c == null) {
 			return new List<SchedulerTimeRange>();
@@ -419,18 +419,18 @@ public without sharing class SchedulerControllerV2 {
 		delete eventId.getSobjectType().newSObject(eventId);
 	}
 
-	private static Scheduler_Fields__mdt getSchedulerFieldMapping(String fieldMappingMetadataName) {
+	private static Scheduler_Fields_V2__mdt getSchedulerFieldMapping(String fieldMappingMetadataName) {
 		if (schedulerFieldMapping != null) {
 			return schedulerFieldMapping;
 		}
 
-		if (!Scheduler_Fields__mdt.getSObjectType().getDescribe().isAccessible()) {
+		if (!Scheduler_Fields_V2__mdt.getSObjectType().getDescribe().isAccessible()) {
 			throw new SchedulerFieldMappingException('Not enough access to Scheduler Fields custom metadata record');
 		}
 
 		Set<String> fieldsToRetrieve = new Set<String>();
 
-		for (SObjectField field : Scheduler_Fields__mdt.getSObjectType().getDescribe().fields.getMap().values()) {
+		for (SObjectField field : Scheduler_Fields_V2__mdt.getSObjectType().getDescribe().fields.getMap().values()) {
 			if (!field.getDescribe().isAccessible()) {
 				throw new SchedulerFieldMappingException('Not enough access to ' + field.getDescribe().getName() + ' field on Scheduler Fields custom metadata record');
 			} else {
@@ -438,7 +438,7 @@ public without sharing class SchedulerControllerV2 {
 			}
 		}
 
-		List<Scheduler_Fields__mdt> schedulerFields = Database.query('SELECT ' + String.join(new List<String>(fieldsToRetrieve), ',') + ' FROM ' + Scheduler_Fields__mdt.getSObjectType().getDescribe().getName() + ' WHERE DeveloperName = :fieldMappingMetadataName');
+		List<Scheduler_Fields_V2__mdt> schedulerFields = Database.query('SELECT ' + String.join(new List<String>(fieldsToRetrieve), ',') + ' FROM ' + Scheduler_Fields_V2__mdt.getSObjectType().getDescribe().getName() + ' WHERE DeveloperName = :fieldMappingMetadataName');
 
 		if (schedulerFields.isEmpty()) {
 			throw new SchedulerFieldMappingException('Scheduler Fields record with Name ' + fieldMappingMetadataName + ' not found');
@@ -582,7 +582,7 @@ public without sharing class SchedulerControllerV2 {
 		@AuraEnabled
 		public SObject resourceRecord;
 
-		public SchedulerResource(SObject resource, Scheduler_Fields__mdt schedulerFields) {
+		public SchedulerResource(SObject resource, Scheduler_Fields_V2__mdt schedulerFields) {
 			id = resource.Id;
 			name = String.valueOf(getSafeFieldValue(schedulerFields.Resource_Name_API_Field__c, resource));
 			imageUrl = String.valueOf(getSafeFieldValue(schedulerFields.Resource_Image_API_Field__c, resource));
@@ -630,7 +630,7 @@ public without sharing class SchedulerControllerV2 {
 		@AuraEnabled
 		public Id property;
 
-		public SchedulerEvent(SObject event, Scheduler_Fields__mdt schedulerFields) {
+		public SchedulerEvent(SObject event, Scheduler_Fields_V2__mdt schedulerFields) {
 			id = event.Id;
 			formulaId = String.valueOf(getSafeFieldValue(schedulerFields.Event_Id_API_Field__c, event));
 			startDate = Datetime.valueOf(getSafeFieldValue(schedulerFields.Event_Start_Date_API_Field__c, event));
@@ -676,7 +676,7 @@ public without sharing class SchedulerControllerV2 {
 		@AuraEnabled
 		public Id resourceId;
 
-		public SchedulerResourceMaintenance(SObject resourceTimeRange, Scheduler_Fields__mdt schedulerFields) {
+		public SchedulerResourceMaintenance(SObject resourceTimeRange, Scheduler_Fields_V2__mdt schedulerFields) {
 			id = resourceTimeRange.Id;
 			startDate = Datetime.valueOf(resourceTimeRange.get(schedulerFields.Resource_Maintenance_Start_API_Field__c));
 			endDate = Datetime.valueOf(resourceTimeRange.get(schedulerFields.Resource_Maintenance_End_API_Field__c));
@@ -698,7 +698,7 @@ public without sharing class SchedulerControllerV2 {
 		@AuraEnabled
 		public String style;
 
-		public SchedulerTimeRange(SObject timeRange, Scheduler_Fields__mdt schedulerFields) {
+		public SchedulerTimeRange(SObject timeRange, Scheduler_Fields_V2__mdt schedulerFields) {
 			id = timeRange.Id;
 			startDate = Datetime.valueOf(timeRange.get(schedulerFields.Time_Range_Start_Date_API_Field__c));
 			endDate = Datetime.valueOf(timeRange.get(schedulerFields.Time_Range_End_Date_API_Field__c));

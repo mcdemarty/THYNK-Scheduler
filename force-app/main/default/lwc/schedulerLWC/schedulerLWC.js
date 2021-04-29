@@ -7,7 +7,7 @@ import schedulerEventChanged from '@salesforce/messageChannel/SchedulerEventChan
 import getSchedulerData from '@salesforce/apex/SchedulerControllerV2.getSchedulerData';
 import saveEvent from '@salesforce/apex/SchedulerControllerV2.saveEvent';
 
-import SCHEDULER from '@salesforce/resourceUrl/Scheduler';
+import SCHEDULER from '@salesforce/resourceUrl/SchedulerV2';
 
 export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
