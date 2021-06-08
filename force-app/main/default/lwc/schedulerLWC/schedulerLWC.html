@@ -17,9 +17,9 @@
 					<div onclick={moveToPreviousPeriodClickHandler}>
 						<lightning-icon icon-name="utility:chevronleft" size="small" class="period-controller-button slds-m-right_small"></lightning-icon>
 					</div>
-					<lightning-input type="date" label="Start Date" value={startDate} onchange={startDateInputChangeHandler} max={maxSelectableStartDate}></lightning-input>
+					<lightning-input type="date" label="Start Date" value={startDate} onchange={startDateInputChangeHandler}></lightning-input>
 					<div class="slds-p-horizontal_small time-range-header-separator"> - </div>
-					<lightning-input type="date" label="End Date" value={endDate} onchange={endDateInputChangeHandler} min={minSelectableEndDate}></lightning-input>
+					<lightning-input type="date" label="End Date" value={endDate} onchange={endDateInputChangeHandler}></lightning-input>
 					<div onclick={moveToNextPeriodClickHandler}>
 						<lightning-icon icon-name="utility:chevronright" size="small" class="period-controller-button slds-m-left_small"></lightning-icon>
 					</div>
