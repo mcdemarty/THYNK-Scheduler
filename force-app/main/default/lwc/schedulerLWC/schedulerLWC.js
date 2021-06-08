@@ -66,9 +66,6 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	savedStartDate;
 	savedEndDate;
 
-	minSelectableEndDate;
-	maxSelectableStartDate;
-
 	savedResourceColumnsFilters;
 	resourceColumnsFiltersChanged = false;
 
@@ -177,11 +174,6 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 		this.customStartDate = schedulerPreset.startDate;
 		this.customEndDate = schedulerPreset.endDate;
-
-		this.minSelectableEndDate = this.startDate;
-		this.maxSelectableStartDate = new Date(this.endDate);
-		this.maxSelectableStartDate.setDate(this.maxSelectableStartDate.getDate() - 1);
-		this.maxSelectableStartDate = this.maxSelectableStartDate.toISOString();
 
 		this.saveSchedulerState();
 
@@ -604,7 +596,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		const startDate = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
 		const endDate = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
 
-		endDate.setDate(startDate.getDate() + 1);
+		endDate.setHours(23, 59, 59);
 
 		return {
 			startDate: startDate,
@@ -803,11 +795,26 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			return;
 		}
 
-		this.currentViewPreset = this.VIEW_PRESET.CUSTOM;
-
 		this.customStartDate = new Date(event.target.value);
 
-		this.initScheduler();
+		if (this.currentViewPreset !== this.VIEW_PRESET.CUSTOM) {
+			this.customEndDate = new Date(this.customStartDate);
+		} else {
+			if (this.customStartDate >= new Date(this.endDate)) {
+				this.customStartDate = new Date(this.endDate);
+				this.customStartDate.setHours(0, 0, 0);
+			}
+		}
+
+		if (this.currentViewPreset === this.VIEW_PRESET.DAY) {
+			this.customEndDate.setHours(23, 59, 59);
+		} else if (this.currentViewPreset === this.VIEW_PRESET.WEEK) {
+			this.customEndDate.setDate(this.customEndDate.getDate() + 7);
+		} else if (this.currentViewPreset === this.VIEW_PRESET.MONTH) {
+			this.customEndDate.setMonth(this.customEndDate.getMonth() + 1);
+		}
+
+		this.initScheduler(true);
 	}
 
 	endDateInputChangeHandler(event) {
@@ -817,11 +824,27 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			return;
 		}
 
-		this.currentViewPreset = this.VIEW_PRESET.CUSTOM;
-
 		this.customEndDate = new Date(event.target.value);
 
-		this.initScheduler();
+		if (this.currentViewPreset !== this.VIEW_PRESET.CUSTOM) {
+			this.customStartDate = new Date(event.target.value);
+		} else {
+			if (this.customEndDate <= new Date(this.startDate)) {
+				this.customEndDate = new Date(this.startDate);
+				this.customEndDate.setHours(23, 59, 59);
+			}
+		}
+
+		if (this.currentViewPreset === this.VIEW_PRESET.DAY) {
+			this.customStartDate.setHours(0, 0, 0);
+			this.customEndDate.setHours(23, 59, 59);
+		} else if (this.currentViewPreset === this.VIEW_PRESET.WEEK) {
+			this.customStartDate.setDate(this.customStartDate.getDate() - 7);
+		} else if (this.currentViewPreset === this.VIEW_PRESET.MONTH) {
+			this.customStartDate.setMonth(this.customStartDate.getMonth() - 1);
+		}
+
+		this.initScheduler(true);
 	}
 
 	createEventClickHandler() {
