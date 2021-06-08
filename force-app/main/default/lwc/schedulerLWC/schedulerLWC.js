@@ -1006,7 +1006,10 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		}
 
 		if (value && value.match && value.match(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d.\d{3}Z$/)) {
-			value = new Date(value).toLocaleString();
+			const date = new Date(value);
+			date.setHours(date.getHours() + this.mainSchedulerData.gmtOffset - new Date().getTimezoneOffset() / 60 * -1);
+
+			value = date.toLocaleString();
 		}
 
 		return value;

@@ -1,4 +1,4 @@
-public without sharing class SchedulerControllerV2 {
+public with sharing class SchedulerControllerV2 {
 
 	private static Scheduler_Fields_V2__mdt schedulerFieldMapping;
 
@@ -556,6 +556,8 @@ public without sharing class SchedulerControllerV2 {
 		public String eventEndDateFieldAPIName;
 		@AuraEnabled
 		public Map<String, String> eventTooltipFieldsNames = new Map<String, String>();
+		@AuraEnabled
+		public Decimal gmtOffset = UserInfo.getTimeZone().getOffset(System.now()) / 1000 / 60 / 60;
 	}
 
 	public class SchedulerResource {
