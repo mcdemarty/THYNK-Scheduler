@@ -606,7 +606,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 				headers: [{
 					unit: 'd',
 					align: 'center',
-					dateFormat: 'DD MMMM'
+					dateFormat: 'ddd MM/DD'
 				}, {
 					unit: 'h',
 					align: 'center',
@@ -633,7 +633,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 				headers: [{
 					unit: 'd',
 					align: 'center',
-					dateFormat: 'DD MMMM'
+					dateFormat: 'ddd MM/DD'
 				}]
 			}
 		};
@@ -651,7 +651,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 				headers: [{
 					unit: 'd',
 					align: 'center',
-					dateFormat: 'DD MMMM'
+					dateFormat: 'ddd MM/DD'
 				}]
 			}
 		};
@@ -669,7 +669,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 				headers: [{
 					unit: 'd',
 					align: 'center',
-					dateFormat: 'DD MMMM'
+					dateFormat: 'ddd MM/DD'
 				}]
 			}
 		};
