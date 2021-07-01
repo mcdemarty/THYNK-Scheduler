@@ -140,7 +140,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			schedulerEventChanged,
 			message => {
 				if (message.isSchedulerUpdate) {
-					this.initScheduler();
+					this.initScheduler(true);
 				}
 			},
 			{
