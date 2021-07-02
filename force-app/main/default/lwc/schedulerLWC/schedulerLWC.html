@@ -12,7 +12,7 @@
 						<lightning-button label="-" onclick={collapseAllClickHandler}></lightning-button>
 					</lightning-button-group>
 					<lightning-button label="New Event" class="slds-m-left_small" onclick={createEventClickHandler}></lightning-button>
-					<lightning-button-group class="slds-m-left_small" if:true={isDayView}>
+					<lightning-button-group class="slds-m-left_medium" if:true={isDayView}>
 						<lightning-button size="small"
 								onclick={moveToPreviousHourPeriodClickHandler}
 								disabled={previousHourPeriodButtonDisabled}
