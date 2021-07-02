@@ -1083,10 +1083,10 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	}
 
 	get hasHotelOptions() {
-		return this.hotelFilterOptions && this.hotelFilterOptions.length;
+		return this.hotelFilterOptions && this.hotelFilterOptions.length > 1;
 	}
 
 	get hasMyceQuoteOptions() {
-		return this.myceQuoteFilterOptions && this.myceQuoteFilterOptions.length;
+		return this.myceQuoteFilterOptions && this.myceQuoteFilterOptions.length > 1;
 	}
 }

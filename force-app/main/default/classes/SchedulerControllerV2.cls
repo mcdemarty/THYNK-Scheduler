@@ -23,10 +23,6 @@ public with sharing class SchedulerControllerV2 {
 		schedulerData.events = getEvents(fieldMappingMetadataName, startDate, endDate, eventCustomFilter, userDefinedEventFilter);
 		schedulerData.resourceColumns = getResourceColumns(fieldMappingMetadataName);
 
-		if (schedulerData.isInPackage) {
-			SchedulerData.addFilterOptions();
-		}
-
 		if (String.isNotEmpty(schedulerFields.Event_Edit_Mode_Fields__c)) {
 			schedulerData.eventEditFields = schedulerFields.Event_Edit_Mode_Fields__c.replaceAll(' ', '').split(',');
 		}
@@ -55,6 +51,10 @@ public with sharing class SchedulerControllerV2 {
 			for (String field : schedulerFields.Event_Tooltip_Fields__c.replaceAll(' ', '').split(',')) {
 				schedulerData.eventTooltipFieldsNames.put(field, checkFieldValidity(field, eventObjectType).getDescribe().getLabel());
 			}
+		}
+
+		if (schedulerData.isInPackage) {
+			SchedulerData.addFilterOptions();
 		}
 
 		return schedulerData;
@@ -598,20 +598,25 @@ public with sharing class SchedulerControllerV2 {
 		}
 
 		public void addFilterOptions() {
-			for (SObject hotel : Database.query('SELECT Id, Name FROM thn__Hotel__c')) {
-				this.hotelFilterOptions.add(new FilterOption(hotel.Id, (String) hotel.get('Name')));
-			}
-
-			Set<Id> quoteIds = new Set<Id>();
-			for (SchedulerEvent schedulerEvent : this.events) {
-				if (String.isNotBlank(schedulerEvent.myceQuote)) {
-					quoteIds.add(schedulerEvent.myceQuote);
+			Map<String, SObjectType> schemaGlobalDescribeResult = Schema.getGlobalDescribe();
+			if (schemaGlobalDescribeResult.get(eventObjectName).getDescribe().fields.getMap().containsKey('thn__Property__c')) {
+				for (SObject hotel : Database.query('SELECT Id, Name FROM thn__Hotel__c')) {
+					this.hotelFilterOptions.add(new FilterOption(hotel.Id, (String) hotel.get('Name')));
 				}
 			}
 
-			if (!quoteIds.isEmpty()) {
-				for (SObject myceQuote : Database.query('SELECT Id, Name FROM thn__MYCE_Quote__c WHERE Id IN :quoteIds')) {
-					this.myceQuoteFilterOptions.add(new FilterOption(myceQuote.Id, (String) myceQuote.get('Name')));
+			if (schemaGlobalDescribeResult.get(eventObjectName).getDescribe().fields.getMap().containsKey('thn__MYCE_Quote__c')) {
+				Set<Id> quoteIds = new Set<Id>();
+				for (SchedulerEvent schedulerEvent : this.events) {
+					if (String.isNotBlank(schedulerEvent.myceQuote)) {
+						quoteIds.add(schedulerEvent.myceQuote);
+					}
+				}
+
+				if (!quoteIds.isEmpty()) {
+					for (SObject myceQuote : Database.query('SELECT Id, Name FROM thn__MYCE_Quote__c WHERE Id IN :quoteIds')) {
+						this.myceQuoteFilterOptions.add(new FilterOption(myceQuote.Id, (String) myceQuote.get('Name')));
+					}
 				}
 			}
 		}
