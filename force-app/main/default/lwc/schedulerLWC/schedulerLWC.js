@@ -48,8 +48,6 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	@track myceQuoteFilterOptions;
 
 	@track userDefinedEventFilter = {};
-	thn__Property__c = null;
-	thn__MYCE_Quote__c = null;
 
 	VIEW_PRESET = {
 		DAY: 1,
@@ -1038,7 +1036,6 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 	handleChangeFilter(event) {
 		this.userDefinedEventFilter[event.target.name] = event.detail.value;
-		this[event.target.name] = event.detail.value;
 		this.initScheduler(true);
 	}
 
@@ -1088,5 +1085,13 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 	get hasMyceQuoteOptions() {
 		return this.myceQuoteFilterOptions && this.myceQuoteFilterOptions.length > 1;
+	}
+
+	get filteredHotel() {
+		return this.userDefinedEventFilter && this.userDefinedEventFilter.thn__Property__c ? this.userDefinedEventFilter.thn__Property__c : null;
+	}
+
+	get filteredMyceQuote() {
+		return this.userDefinedEventFilter && this.userDefinedEventFilter.thn__MYCE_Quote__c ? this.userDefinedEventFilter.thn__MYCE_Quote__c : null;
 	}
 }

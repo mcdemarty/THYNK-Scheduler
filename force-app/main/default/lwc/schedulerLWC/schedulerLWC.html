@@ -20,7 +20,7 @@
 								if:true={hasHotelOptions}
 								options={hotelFilterOptions}
 								onchange={handleChangeFilter}
-								value={thn__Property__c}
+								value={filteredHotel}
 						></lightning-combobox>
 					</div>
 					<div class="slds-m-left_small" if:true={isInPackage}>
@@ -31,7 +31,7 @@
 								if:true={hasMyceQuoteOptions}
 								options={myceQuoteFilterOptions}
 								onchange={handleChangeFilter}
-								value={thn__MYCE_Quote__c}
+								value={filteredMyceQuote}
 						></lightning-combobox>
 					</div>
 				</div>
