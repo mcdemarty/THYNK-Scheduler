@@ -57,6 +57,10 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 	schedulers = [];
 
+	dayViewHourInterval = 11;
+	currentHourPeriod = 1;
+	hourPeriodStartHours = [0, 7, 13];
+
 	startDate;
 	endDate;
 
@@ -492,6 +496,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		state.startDate = new Date(this.customStartDate).toISOString();
 		state.endDate = new Date(this.customEndDate).toISOString();
 		state.resourceColumnsFilters = this.savedResourceColumnsFilters || [];
+		state.currentHourPeriod = this.currentHourPeriod;
 
 		window.localStorage.setItem(window.location + '-SC', JSON.stringify(state));
 	}
@@ -505,6 +510,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		this.collapsedResources = state.collapsedResources;
 		this.currentViewPreset = state.preset;
 		this.savedResourceColumnsFilters = state.resourceColumnsFilters;
+		this.currentHourPeriod = state.currentHourPeriod != null ? state.currentHourPeriod : this.currentHourPeriod;
 
 		if (state.startDate && state.endDate) {
 			this.savedStartDate = new Date(state.startDate);
@@ -593,12 +599,15 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	}
 
 	getCurrentDayPreset() {
-		const startDate = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+		/*const startDate = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
 		const endDate = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
 
-		endDate.setHours(23, 59, 59);
+		endDate.setHours(23, 59, 59);*/
 
-		return {
+		const startDate = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), this.hourPeriodStartHours[this.currentHourPeriod]);
+		const endDate = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), this.hourPeriodStartHours[this.currentHourPeriod] + this.dayViewHourInterval, 0, -1, 0);
+		
+    return {
 			startDate: startDate,
 			endDate: endDate,
 			viewPreset: {
@@ -903,6 +912,28 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		this.initScheduler();
 	}
 
+	moveToPreviousHourPeriodClickHandler() {
+		this.currentHourPeriod -= 1;
+		this.setDayViewTimePeriod();
+	}
+
+	moveToNextHourPeriodClickHandler() {
+		this.currentHourPeriod += 1;
+		this.setDayViewTimePeriod();
+	}
+
+	setDayViewTimePeriod() {
+		if (this.currentViewPreset === this.VIEW_PRESET.DAY) {
+			this.savedStartDate = this.customStartDate;
+			this.savedEndDate = this.customEndDate;
+
+			this.savedStartDate.setHours(this.hourPeriodStartHours[this.currentHourPeriod], 0, 0, 0);
+			this.savedEndDate.setHours(this.hourPeriodStartHours[this.currentHourPeriod] + this.dayViewHourInterval, 0, -1, 0);
+
+			this.initScheduler();
+		}
+	}
+
 	// Scheduler Listeners
 
 	eventDropResizeHandler(event) {
@@ -1031,6 +1062,10 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		return this.currentViewPreset.toString();
 	}
 
+	get isDayView() {
+		return this.currentViewPreset === this.VIEW_PRESET.DAY;
+	}
+
 	get viewPresetPicklistOptions() {
 		return [{
 			label: 'Day',
@@ -1047,8 +1082,20 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		}]
 	}
 
+	get previousHourPeriodButtonDisabled() {
+		return this.currentHourPeriod == 0;
+	}
+
+	get nextHourPeriodButtonDisabled() {
+		return this.currentHourPeriod == (this.hourPeriodStartHours.length - 1);
+	}
+
 	get renderCreateEventModal() {
 		return this.schedulers && this.schedulers.length > 0;
+	}
+
+	display(objectToDisplay, name) {
+		console.log(name || '', objectToDisplay ? JSON.parse(JSON.stringify(objectToDisplay)) : null);
 	}
 
 }

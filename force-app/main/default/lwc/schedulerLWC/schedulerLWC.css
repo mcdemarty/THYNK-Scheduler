@@ -39,6 +39,10 @@
     cursor: pointer;
 }
 
+.hour-period-controller-button {
+    cursor: pointer;
+}
+
 .b-filter-bar-field .b-field-inner {
     height: 28px;
     border-radius: 0.25rem;
