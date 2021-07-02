@@ -1,4 +1,4 @@
-import { LightningElement, api, wire } from 'lwc';
+import { LightningElement, api, track, wire } from 'lwc';
 import { loadScript, loadStyle } from "lightning/platformResourceLoader";
 import { ShowToastEvent } from 'lightning/platformShowToastEvent'
 import { NavigationMixin } from 'lightning/navigation';
@@ -43,6 +43,13 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	@api resourceHeadingFontSize;
 	@api resourceHeadingFontColor;
 	@api resourceHeadingAlignment;
+
+	@track hotelFilterOptions;
+	@track myceQuoteFilterOptions;
+
+	@track userDefinedEventFilter = {};
+	thn__Property__c = null;
+	thn__MYCE_Quote__c = null;
 
 	VIEW_PRESET = {
 		DAY: 1,
@@ -183,6 +190,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 				startDate: schedulerPreset.startDate.toISOString(),
 				endDate: schedulerPreset.endDate.toISOString(),
 				eventCustomFilter: this.eventCustomFilter,
+				userDefinedEventFilter: this.userDefinedEventFilter,
 				resourceCustomFilter: this.resourceCustomFilter,
 				resourceOrderRule: this.resourceOrderRule
 			})
@@ -194,6 +202,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 				startDate: schedulerPreset.startDate.toISOString(),
 				endDate: schedulerPreset.endDate.toISOString(),
 				eventCustomFilter: this.secondEventCustomFilter,
+				userDefinedEventFilter: this.userDefinedEventFilter,
 				resourceCustomFilter: this.secondResourceCustomFilter,
 				resourceOrderRule: this.resourceOrderRule
 			}));
@@ -206,6 +215,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 				}
 
 				this.mainSchedulerData = JSON.parse(JSON.stringify(results[0]));
+				this.setupFilterOptions();
 
 				for (let schedulerIndex = 0; schedulerIndex < results.length; schedulerIndex++) {
 					const result = results[schedulerIndex];
@@ -1015,6 +1025,23 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		return value;
 	}
 
+	setupFilterOptions() {
+		if (!this.hotelFilterOptions) {
+			this.hotelFilterOptions = this.mainSchedulerData.hotelFilterOptions;
+			this.hotelFilterOptions.unshift({label: '- Any -', value: null});
+		}
+		if (!this.myceQuoteFilterOptions) {
+			this.myceQuoteFilterOptions = this.mainSchedulerData.myceQuoteFilterOptions;
+			this.myceQuoteFilterOptions.unshift({label: '- Any -', value: null});
+		}
+	}
+
+	handleChangeFilter(event) {
+		this.userDefinedEventFilter[event.target.name] = event.detail.value;
+		this[event.target.name] = event.detail.value;
+		this.initScheduler(true);
+	}
+
 	showErrorToast(message) {
 		this.dispatchEvent(new ShowToastEvent({
 			title: 'Error',
@@ -1051,4 +1078,15 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		return this.schedulers && this.schedulers.length > 0;
 	}
 
+	get isInPackage() {
+		return this.mainSchedulerData && this.mainSchedulerData.isInPackage;
+	}
+
+	get hasHotelOptions() {
+		return this.hotelFilterOptions && this.hotelFilterOptions.length;
+	}
+
+	get hasMyceQuoteOptions() {
+		return this.myceQuoteFilterOptions && this.myceQuoteFilterOptions.length;
+	}
 }

@@ -3,18 +3,29 @@ public with sharing class SchedulerControllerV2 {
 	private static Scheduler_Fields_V2__mdt schedulerFieldMapping;
 
 	@AuraEnabled(Cacheable=false)
-	public static SchedulerData getSchedulerData(String fieldMappingMetadataName, Datetime startDate, Datetime endDate, String eventCustomFilter, String resourceCustomFilter, String resourceOrderRule) {
+	public static SchedulerData getSchedulerData(
+		String fieldMappingMetadataName,
+		Datetime startDate,
+		Datetime endDate,
+		String eventCustomFilter,
+		Map<String, String> userDefinedEventFilter,
+		String resourceCustomFilter,
+		String resourceOrderRule
+	) {
 		if (!FeatureManagement.checkPermission(getPackagedName('Scheduler')) && !Test.isRunningTest()) {
 			throw new SchedulerException('No permissions to access the Scheduler');
 		}
 
 		Scheduler_Fields_V2__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
-
-		SchedulerData schedulerData = new SchedulerData();
+		SchedulerData schedulerData = new SchedulerData(startDate, endDate);
 
 		schedulerData.resources = getResources(fieldMappingMetadataName, resourceCustomFilter, resourceOrderRule);
-		schedulerData.events = getEvents(fieldMappingMetadataName, startDate, endDate, eventCustomFilter);
+		schedulerData.events = getEvents(fieldMappingMetadataName, startDate, endDate, eventCustomFilter, userDefinedEventFilter);
 		schedulerData.resourceColumns = getResourceColumns(fieldMappingMetadataName);
+
+		if (schedulerData.isInPackage) {
+			SchedulerData.addFilterOptions();
+		}
 
 		if (String.isNotEmpty(schedulerFields.Event_Edit_Mode_Fields__c)) {
 			schedulerData.eventEditFields = schedulerFields.Event_Edit_Mode_Fields__c.replaceAll(' ', '').split(',');
@@ -264,7 +275,7 @@ public with sharing class SchedulerControllerV2 {
 		return columns;
 	}
 
-	private static List<SchedulerEvent> getEvents(String fieldMappingMetadataName, Datetime startTime, Datetime endTime, String eventCustomFilter) {
+	private static List<SchedulerEvent> getEvents(String fieldMappingMetadataName, Datetime startTime, Datetime endTime, String eventCustomFilter, Map<String, String> userDefinedEventFilter) {
 		Scheduler_Fields_V2__mdt schedulerFields = getSchedulerFieldMapping(fieldMappingMetadataName);
 
 		Set<String> fieldsToRetrieve = new Set<String> {
@@ -308,6 +319,10 @@ public with sharing class SchedulerControllerV2 {
 			fieldsToRetrieve.add('thn__Property__c');
 		}
 
+		if (schemaGlobalDescribeResult.get(schedulerFields.Event_API_Name__c).getDescribe().fields.getMap().containsKey('thn__MYCE_Quote__c')) {
+			fieldsToRetrieve.add('thn__MYCE_Quote__c');
+		}
+
 		if (!schemaGlobalDescribeResult.containsKey(schedulerFields.Event_API_Name__c)) {
 			throw new SchedulerFieldMappingException('Event object ' + schedulerFields.Event_API_Name__c + ' not found');
 		}
@@ -328,7 +343,13 @@ public with sharing class SchedulerControllerV2 {
 		if (String.isNotEmpty(eventCustomFilter)) {
 			query += ' AND ' + eventCustomFilter;
 		}
-
+		if (userDefinedEventFilter != null && !userDefinedEventFilter.isEmpty()) {
+			for (String filterKey : userDefinedEventFilter.keySet()) {
+				if (String.isNotBlank(userDefinedEventFilter.get(filterKey))) {
+					query += ' AND ' + filterKey + ' = ' + '\'' + userDefinedEventFilter.get(filterKey) + '\'';
+				}
+			}
+		}
 		List<SObject> queriedEvents = Database.query(query);
 
 		List<SchedulerEvent> events = new List<SchedulerEvent>();
@@ -531,7 +552,13 @@ public with sharing class SchedulerControllerV2 {
 		return null;
 	}
 
+	private static Boolean isInPackage() {
+		return Schema.getGlobalDescribe().containsKey('thn__Hotel__c') && Schema.getGlobalDescribe().containsKey('thn__MYCE_Quote__c');
+	}
+
 	public class SchedulerData {
+		public Datetime startDate;
+		public Datetime endDate;
 		@AuraEnabled
 		public List<SchedulerResource> resources = new List<SchedulerResource>();
 		@AuraEnabled
@@ -558,6 +585,36 @@ public with sharing class SchedulerControllerV2 {
 		public Map<String, String> eventTooltipFieldsNames = new Map<String, String>();
 		@AuraEnabled
 		public Decimal gmtOffset = UserInfo.getTimeZone().getOffset(System.now()) / 1000 / 60 / 60;
+		@AuraEnabled
+		public Boolean isInPackage = isInPackage();
+		@AuraEnabled
+		public List<FilterOption> hotelFilterOptions = new List<FilterOption>();
+		@AuraEnabled
+		public List<FilterOption> myceQuoteFilterOptions = new List<FilterOption>();
+
+		public SchedulerData(Datetime startDate, Datetime endDate) {
+			this.startDate = startDate;
+			this.endDate = endDate;
+		}
+
+		public void addFilterOptions() {
+			for (SObject hotel : Database.query('SELECT Id, Name FROM thn__Hotel__c')) {
+				this.hotelFilterOptions.add(new FilterOption(hotel.Id, (String) hotel.get('Name')));
+			}
+
+			Set<Id> quoteIds = new Set<Id>();
+			for (SchedulerEvent schedulerEvent : this.events) {
+				if (String.isNotBlank(schedulerEvent.myceQuote)) {
+					quoteIds.add(schedulerEvent.myceQuote);
+				}
+			}
+
+			if (!quoteIds.isEmpty()) {
+				for (SObject myceQuote : Database.query('SELECT Id, Name FROM thn__MYCE_Quote__c WHERE Id IN :quoteIds')) {
+					this.myceQuoteFilterOptions.add(new FilterOption(myceQuote.Id, (String) myceQuote.get('Name')));
+				}
+			}
+		}
 	}
 
 	public class SchedulerResource {
@@ -631,6 +688,8 @@ public with sharing class SchedulerControllerV2 {
 		public Id previousEvent;
 		@AuraEnabled
 		public Id property;
+		@AuraEnabled
+		public Id myceQuote;
 
 		public SchedulerEvent(SObject event, Scheduler_Fields_V2__mdt schedulerFields) {
 			id = event.Id;
@@ -644,6 +703,10 @@ public with sharing class SchedulerControllerV2 {
 
 			if (event.getSObjectType().getDescribe().fields.getMap().containsKey('thn__Property__c')) {
 				property = String.valueOf(getSafeFieldValue('thn__Property__c', event));
+			}
+
+			if (event.getSObjectType().getDescribe().fields.getMap().containsKey('thn__MYCE_Quote__c')) {
+				myceQuote = String.valueOf(getSafeFieldValue('thn__MYCE_Quote__c', event));
 			}
 
 			if (getSafeFieldValue(schedulerFields.Event_Color_API_Field__c, event) != null) {
@@ -743,6 +806,22 @@ public with sharing class SchedulerControllerV2 {
 
 		public Integer compareTo(Object anotherPath) {
 			return path.length() - ((ResourcePath)anotherPath).path.length();
+		}
+	}
+
+	public class FilterOption {
+		@AuraEnabled
+		public Id value;
+
+		@AuraEnabled
+		public String label;
+
+		@AuraEnabled
+		public Boolean isDefault;
+
+		public FilterOption(Id recordId, String label) {
+			this.value = recordId;
+			this.label = label;
 		}
 	}
 

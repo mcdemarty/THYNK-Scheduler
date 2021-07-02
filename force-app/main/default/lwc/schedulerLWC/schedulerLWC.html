@@ -12,6 +12,28 @@
 						<lightning-button label="-" onclick={collapseAllClickHandler}></lightning-button>
 					</lightning-button-group>
 					<lightning-button label="New Event" class="slds-m-left_small" onclick={createEventClickHandler}></lightning-button>
+					<div class="slds-m-left_small" if:true={isInPackage}>
+						<lightning-combobox
+								name="thn__Property__c"
+								placeholder="Property"
+								variant="label-hidden"
+								if:true={hasHotelOptions}
+								options={hotelFilterOptions}
+								onchange={handleChangeFilter}
+								value={thn__Property__c}
+						></lightning-combobox>
+					</div>
+					<div class="slds-m-left_small" if:true={isInPackage}>
+						<lightning-combobox
+								name="thn__MYCE_Quote__c"
+								placeholder="Myce Quote"
+								variant="label-hidden"
+								if:true={hasMyceQuoteOptions}
+								options={myceQuoteFilterOptions}
+								onchange={handleChangeFilter}
+								value={thn__MYCE_Quote__c}
+						></lightning-combobox>
+					</div>
 				</div>
 				<div class="slds-grid slds-grid_vertical-align-center">
 					<div onclick={moveToPreviousPeriodClickHandler}>
