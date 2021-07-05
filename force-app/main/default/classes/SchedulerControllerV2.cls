@@ -46,6 +46,9 @@ public with sharing class SchedulerControllerV2 {
 			}
 		}
 
+		schedulerData.minStartDate = schedulerFields.Min_Start_Date__c;
+		schedulerData.maxEndDate = schedulerFields.Max_End_Date__c;
+
 		return schedulerData;
 	}
 
@@ -558,6 +561,10 @@ public with sharing class SchedulerControllerV2 {
 		public Map<String, String> eventTooltipFieldsNames = new Map<String, String>();
 		@AuraEnabled
 		public Decimal gmtOffset = UserInfo.getTimeZone().getOffset(System.now()) / 1000 / 60 / 60;
+		@AuraEnabled
+		public Date minStartDate;
+		@AuraEnabled
+		public Date maxEndDate;
 	}
 
 	public class SchedulerResource {

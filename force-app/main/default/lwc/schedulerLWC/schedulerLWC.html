@@ -13,13 +13,13 @@
 					</lightning-button-group>
 					<lightning-button label="New Event" class="slds-m-left_small" onclick={createEventClickHandler}></lightning-button>
 				</div>
-				<div class="slds-grid slds-grid_vertical-align-center">
+				<div class="slds-grid slds-grid_vertical-align-center" if:true={mainSchedulerData}>
 					<div onclick={moveToPreviousPeriodClickHandler}>
 						<lightning-icon icon-name="utility:chevronleft" size="small" class="period-controller-button slds-m-right_small"></lightning-icon>
 					</div>
-					<lightning-input type="date" label="Start Date" value={startDate} onchange={startDateInputChangeHandler}></lightning-input>
+					<lightning-input type="date" label="Start Date" value={startDate} onchange={startDateInputChangeHandler} min={mainSchedulerData.minStartDate} max={mainSchedulerData.maxEndDate}></lightning-input>
 					<div class="slds-p-horizontal_small time-range-header-separator"> - </div>
-					<lightning-input type="date" label="End Date" value={endDate} onchange={endDateInputChangeHandler}></lightning-input>
+					<lightning-input type="date" label="End Date" value={endDate} onchange={endDateInputChangeHandler} min={mainSchedulerData.minStartDate} max={mainSchedulerData.maxEndDate}></lightning-input>
 					<div onclick={moveToNextPeriodClickHandler}>
 						<lightning-icon icon-name="utility:chevronright" size="small" class="period-controller-button slds-m-left_small"></lightning-icon>
 					</div>
