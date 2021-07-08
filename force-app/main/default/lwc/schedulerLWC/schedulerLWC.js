@@ -343,14 +343,22 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 										text: 'Add Event',
 										icon: 'b-fa b-fa-plus',
 										onItem: ({date, resourceRecord, items}) => {
+											if (extensibleResult.eventStartDateFieldAPIName && date) {
+											  this.eventToHandle[extensibleResult.eventStartDateFieldAPIName] = new Date(date).toISOString();
+											  this.eventToHandle[extensibleResult.eventEndDateFieldAPIName] = new Date(new Date(this.eventToHandle[extensibleResult.eventStartDateFieldAPIName]).getTime() + 24 * 60 * 60 * 1000).toISOString();
+											}
+											if (extensibleResult.eventParentResourceFieldAPIName && resourceRecord && resourceRecord.id) {
+											  this.eventToHandle[extensibleResult.eventParentResourceFieldAPIName] = resourceRecord.id;
+											}
+											this.setPredefinedData();
 											this.createEventClickHandler();
 
-											setTimeout(() => {
+											/*setTimeout(() => {
 												const modal = this.template.querySelector('.scheduler-event-create-modal');
 
 												modal.setFieldValue(extensibleResult.eventStartDateFieldAPIName, new Date(date).toISOString());
 												modal.setFieldValue(extensibleResult.eventParentResourceFieldAPIName, resourceRecord.id);
-											}, 0);
+											}, 0);*/
 										}
 									}
 								}
@@ -972,6 +980,14 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	eventClickHandler(event) {
 		this.relatedComponent.selectedEventId = event.eventRecord.id;
 		this.relatedComponent.template.querySelector('.scheduler-event-create-modal').showModal();
+	}
+  
+	setPredefinedData() {
+		if (this.eventDefaultStyle && this.mainSchedulerData && this.mainSchedulerData.eventStyleFieldName) {
+			if (!this.eventToHandle[this.mainSchedulerData.eventStyleFieldName]) {
+				this.eventToHandle[this.mainSchedulerData.eventStyleFieldName] = this.eventDefaultStyle;
+			}
+		}
 	}
 
 	timeAxisChangeHandler(event) {
