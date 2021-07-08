@@ -34,12 +34,17 @@
 
 	<template if:true={renderCreateEventModal}>
 		<c-scheduler-event-create-modal-v2 class="scheduler-event-create-modal" event-object-name={mainSchedulerData.eventObjectName}
-										fields={mainSchedulerData.eventEditFields} oneventcreate={eventCreateHandler}
+										fields={mainSchedulerData.eventEditFields}
+									   	oneventcreate={eventCreateHandler}
+									   	oneventcreatecancel={eventCancelCreateHandler}
 										field-data={mainSchedulerData.eventEditFieldData}
 										event-id={selectedEventId} field-mapping-metadata-name={schedulerFieldsMetadataName}
 										event-parent-resource-field-name={mainSchedulerData.eventParentResourceFieldAPIName}
 										event-start-date-field-name={mainSchedulerData.eventStartDateFieldAPIName}
 										event-end-date-field-name={mainSchedulerData.eventEndDateFieldAPIName}
-										use-overbooking-flow={useOverbookingFlow}></c-scheduler-event-create-modal-v2>
+										use-overbooking-flow={useOverbookingFlow}
+										event-to-handle={eventToHandle}
+									   	onupdaterecord={handleUpdateRecord}
+		></c-scheduler-event-create-modal-v2>
 	</template>
 </template>
