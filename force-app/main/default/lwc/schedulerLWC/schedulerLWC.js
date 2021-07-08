@@ -1,10 +1,11 @@
-import { LightningElement, api, wire } from 'lwc';
+import { LightningElement, api, track, wire } from 'lwc';
 import { loadScript, loadStyle } from "lightning/platformResourceLoader";
 import { ShowToastEvent } from 'lightning/platformShowToastEvent'
 import { NavigationMixin } from 'lightning/navigation';
 import { subscribe, unsubscribe, APPLICATION_SCOPE, publish, MessageContext } from 'lightning/messageService';
 import schedulerEventChanged from '@salesforce/messageChannel/SchedulerEventChanged__c';
 import getSchedulerData from '@salesforce/apex/SchedulerControllerV2.getSchedulerData';
+import getEventRecord from '@salesforce/apex/SchedulerControllerV2.getEventRecord';
 import saveEvent from '@salesforce/apex/SchedulerControllerV2.saveEvent';
 
 import SCHEDULER from '@salesforce/resourceUrl/SchedulerV2';
@@ -43,6 +44,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	@api resourceHeadingFontSize;
 	@api resourceHeadingFontColor;
 	@api resourceHeadingAlignment;
+
+	@track eventToHandle = {};
 
 	VIEW_PRESET = {
 		DAY: 1,
@@ -153,6 +156,9 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 	initScheduler(preserveDates) {
 		this.showSpinner = true;
+
+		this.selectedEventId = null;
+		this.eventToHandle = {};
 
 		const schedulerPreset = this.getCurrentPreset();
 
@@ -857,6 +863,11 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		this.initScheduler(true);
 	}
 
+	eventCancelCreateHandler() {
+		this.selectedEventId = null;
+		this.eventToHandle = {};
+	}
+
 	moveToNextPeriodClickHandler() {
 		this.savedStartDate = this.customStartDate;
 		this.savedEndDate = this.customEndDate;
@@ -971,7 +982,19 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 	eventClickHandler(event) {
 		this.relatedComponent.selectedEventId = event.eventRecord.id;
-		this.relatedComponent.template.querySelector('.scheduler-event-create-modal').showModal();
+		getEventRecord(
+			{
+				recordId : this.relatedComponent.selectedEventId,
+				fields: this.relatedComponent.mainSchedulerData.eventEditFields
+			}
+		)
+		.then(data => {
+			this.relatedComponent.eventToHandle = data;
+			this.relatedComponent.template.querySelector('.scheduler-event-create-modal').showModal();
+		})
+		.catch(e => {
+			console.log(e);
+		});
 	}
 
 	timeAxisChangeHandler(event) {
@@ -989,6 +1012,12 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 			this.relatedComponent.initScheduler(true);
 		}, 1000);
+	}
+  
+  handleUpdateRecord(event) {
+		const fieldName = event.detail.fieldName;
+		const fieldValue = event.detail.fieldValue;
+		this.eventToHandle[fieldName] = fieldValue;
 	}
 
 	getNestedFieldValue(value, currentObjectLevel, field) {

@@ -29,6 +29,13 @@ public with sharing class SchedulerControllerV2 {
 		schedulerData.eventStartDateFieldAPIName = schedulerFields.Event_Start_Date_API_Field__c;
 		schedulerData.eventEndDateFieldAPIName = schedulerFields.Event_End_Date_API_Field__c;
 
+		if (!schedulerData.eventEditFields.isEmpty()) {
+			Map<String, SObjectField> fieldMap = Schema.getGlobalDescribe().get(schedulerFields.Event_API_Name__c).getDescribe().fields.getMap();
+			for (String fieldName : schedulerData.eventEditFields) {
+				schedulerData.eventEditFieldData.put(fieldName, new FieldData(fieldMap.get(fieldName)));
+			}
+		}
+
 		List<Id> resources = new List<Id>();
 
 		for (SchedulerResource resource : schedulerData.resources) {
@@ -47,6 +54,14 @@ public with sharing class SchedulerControllerV2 {
 		}
 
 		return schedulerData;
+	}
+
+	@AuraEnabled
+	public static SObject getEventRecord(Id recordId, List<String> fields) {
+		String query = 'SELECT Id, ' + String.join(fields, ', ') +
+			' FROM ' + recordId.getSobjectType() +
+			' WHERE Id = :recordId';
+		return Database.query(query);
 	}
 
 	@AuraEnabled
@@ -545,6 +560,8 @@ public with sharing class SchedulerControllerV2 {
 		@AuraEnabled
 		public List<String> eventEditFields = new List<String>();
 		@AuraEnabled
+		public Map<String, FieldData> eventEditFieldData = new Map<String, FieldData>();
+		@AuraEnabled
 		public List<String> eventTooltipFields = new List<String>();
 		@AuraEnabled
 		public String eventObjectName;
@@ -668,6 +685,113 @@ public with sharing class SchedulerControllerV2 {
 		}
 	}
 
+	public class FieldData {
+		@AuraEnabled
+		public String fieldName;
+
+		@AuraEnabled
+		public String fieldLabel;
+
+		@AuraEnabled
+		public String fieldType;
+
+		@AuraEnabled
+		public Boolean isTextField;
+
+		@AuraEnabled
+		public Boolean isTextAreaField;
+
+		@AuraEnabled
+		public Boolean isLookupField;
+
+		@AuraEnabled
+		public ObjectData referenceObject;
+
+		@AuraEnabled
+		public Boolean isPicklistField;
+
+		@AuraEnabled
+		public Boolean isDateField;
+
+		@AuraEnabled
+		public Boolean isTimeField;
+
+		@AuraEnabled
+		public Boolean isDateTimeField;
+
+		@AuraEnabled
+		public Boolean isNumberField;
+
+		@AuraEnabled
+		public Boolean isCurrencyField;
+
+		@AuraEnabled
+		public Boolean isPercentageField;
+
+		@AuraEnabled
+		public Double step;
+
+		@AuraEnabled
+		public Boolean isCheckboxField;
+
+		@AuraEnabled
+		public List<PicklistOption> picklistOptions = new List<PicklistOption>();
+
+		public FieldData(SObjectField field) {
+			DescribeFieldResult fieldDescription = field.getDescribe();
+			this.fieldName = fieldDescription.name;
+			this.fieldLabel = fieldDescription.label;
+			this.fieldType = String.valueOf(fieldDescription.type);
+			this.isTextField = this.fieldType == String.valueOf(DisplayType.STRING);
+			this.isTextAreaField = this.fieldType == String.valueOf(DisplayType.TEXTAREA);
+			this.isLookupField = this.fieldType == String.valueOf(DisplayType.REFERENCE);
+			this.isPicklistField = this.fieldType == String.valueOf(DisplayType.PICKLIST);
+			this.isDateField = this.fieldType == String.valueOf(DisplayType.DATE);
+			this.isTimeField = this.fieldType == String.valueOf(DisplayType.TIME);
+			this.isDateTimeField = this.fieldType == String.valueOf(DisplayType.DATETIME);
+            		this.isCheckboxField = this.fieldType == String.valueOf(DisplayType.BOOLEAN);
+            		this.isNumberField = this.fieldType == String.valueOf(DisplayType.DOUBLE);
+			this.isCurrencyField = this.fieldType == String.valueOf(DisplayType.CURRENCY);
+			this.isPercentageField = this.fieldType == String.valueOf(DisplayType.PERCENT);
+
+            if (this.isNumberField || this.isCurrencyField || this.isPercentageField) {
+                this.step = 1 / Math.pow(10, field.getDescribe().scale);
+            }
+
+            if (this.isLookupField) {
+				this.referenceObject = new ObjectData(field.getDescribe().referenceTo[0]);
+            }
+
+            if (this.isPicklistField) {
+                picklistOptions.add(new PicklistOption(null, '--- None ---'));
+                for (Schema.PicklistEntry picklistEntry : field.getDescribe().picklistValues) {
+                    picklistOptions.add(new PicklistOption(picklistEntry.value, picklistEntry.label));
+                }
+            }
+		}
+	}
+
+	public class ObjectData {
+		@AuraEnabled
+		public String name;
+		@AuraEnabled
+		public String label;
+		@AuraEnabled
+		public String defaultRecordTypeId;
+
+		public ObjectData(SObjectType sObjectType) {
+			DescribeSObjectResult describeSObjectResult = sObjectType.getDescribe();
+
+			this.name = describeSObjectResult.name;
+			this.label = describeSObjectResult.label;
+			for (Schema.RecordTypeInfo recordTypeInfo : describeSObjectResult.recordTypeInfos) {
+				if (recordTypeInfo.isDefaultRecordTypeMapping()) {
+					this.defaultRecordTypeId = recordTypeInfo.getRecordTypeId();
+				}
+			}
+		}
+	}
+
 	public class SchedulerResourceMaintenance {
 		@AuraEnabled
 		public Id id;
@@ -743,6 +867,22 @@ public with sharing class SchedulerControllerV2 {
 
 		public Integer compareTo(Object anotherPath) {
 			return path.length() - ((ResourcePath)anotherPath).path.length();
+		}
+	}
+
+	public class PicklistOption {
+		@AuraEnabled
+		public String value;
+
+		@AuraEnabled
+		public String label;
+
+		@AuraEnabled
+		public Boolean isDefault = false;
+
+		public PicklistOption(String value, String label) {
+			this.value = value;
+			this.label = label;
 		}
 	}
 

@@ -1,0 +1,107 @@
+<template>
+    <c-custom-lookup
+            if:true={isLookupField}
+            name={fieldName}
+            obj-name={referenceObject}
+            record-field="Id"
+            prepopulate="true"
+            prepopulation-value={fieldValue}
+            label={fieldLabel}
+            icon-name="standard:event"
+            without-duplicates="false"
+            search-placeholder=""
+            onlookupselected={handleLookupSelection}
+            onlookupreset={handleLookupSelection}
+            allow-creation="true"
+            obj-label={referenceObjectLabel}
+            obj-record-type-id={referenceObjectRecordTypeId}
+            field-to-assign-obj={fieldName}
+    ></c-custom-lookup>
+
+    <lightning-input type="text"
+                     if:true={isTextField}
+                     name={fieldName}
+                     label={fieldLabel}
+                     value={fieldValue}
+                     onchange={handleChangeText}
+    ></lightning-input>
+
+    <lightning-textarea
+                     if:true={isTextAreaField}
+                     name={fieldName}
+                     label={fieldLabel}
+                     value={fieldValue}
+                     onchange={handleChangeText}
+    ></lightning-textarea>
+
+    <lightning-input type="checkbox"
+                     if:true={isCheckboxField}
+                     name={fieldName}
+                     label={fieldLabel}
+                     checked={fieldValue}
+                     onchange={handleChangeCheckbox}
+    ></lightning-input>
+
+    <lightning-input type="date"
+                     if:true={isDateField}
+                     name={fieldName}
+                     label={fieldLabel}
+                     value={fieldValue}
+                     onchange={handleChangeDate}
+    ></lightning-input>
+
+    <lightning-input type="time"
+                     if:true={isTimeField}
+                     name={fieldName}
+                     label={fieldLabel}
+                     value={fieldValue}
+                     onchange={handleChangeDate}
+    ></lightning-input>
+
+    <lightning-input type="datetime"
+                     if:true={isDateTimeField}
+                     name={fieldName}
+                     label={fieldLabel}
+                     value={fieldValue}
+                     onchange={handleChangeDate}
+    ></lightning-input>
+
+    <lightning-input type="number"
+                     if:true={isNumberField}
+                     name={fieldName}
+                     label={fieldLabel}
+                     value={fieldValue}
+                     onchange={handleChangeNumber}
+                     step={step}
+    ></lightning-input>
+
+    <lightning-input type="number"
+                     formatter="currency"
+                     if:true={isCurrencyField}
+                     name={fieldName}
+                     label={fieldLabel}
+                     value={fieldValue}
+                     onchange={handleChangeNumber}
+                     step={step}
+    ></lightning-input>
+
+    <lightning-input type="number"
+                     if:true={isPercentageField}
+                     name={fieldName}
+                     label={fieldLabel}
+                     value={fieldValue}
+                     onchange={handleChangeNumber}
+                     step={step}
+    ></lightning-input>
+
+    <lightning-combobox
+            if:true={isPicklistField}
+            name={fieldName}
+            label={fieldLabel}
+            value={fieldValue}
+            onchange={handleChangePicklist}
+            options={picklistOptions}
+    ></lightning-combobox>
+
+    <div class="h-1-r"></div>
+</template>

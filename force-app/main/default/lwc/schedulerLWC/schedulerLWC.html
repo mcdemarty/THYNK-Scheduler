@@ -33,12 +33,13 @@
 	</div>
 
 	<template if:true={renderCreateEventModal}>
-		<c-scheduler-event-create-modal class="scheduler-event-create-modal" event-object-name={mainSchedulerData.eventObjectName}
+		<c-scheduler-event-create-modal-v2 class="scheduler-event-create-modal" event-object-name={mainSchedulerData.eventObjectName}
 										fields={mainSchedulerData.eventEditFields} oneventcreate={eventCreateHandler}
+										field-data={mainSchedulerData.eventEditFieldData}
 										event-id={selectedEventId} field-mapping-metadata-name={schedulerFieldsMetadataName}
 										event-parent-resource-field-name={mainSchedulerData.eventParentResourceFieldAPIName}
 										event-start-date-field-name={mainSchedulerData.eventStartDateFieldAPIName}
 										event-end-date-field-name={mainSchedulerData.eventEndDateFieldAPIName}
-										use-overbooking-flow={useOverbookingFlow}></c-scheduler-event-create-modal>
+										use-overbooking-flow={useOverbookingFlow}></c-scheduler-event-create-modal-v2>
 	</template>
 </template>
