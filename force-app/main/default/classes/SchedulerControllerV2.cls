@@ -1,6 +1,23 @@
 public with sharing class SchedulerControllerV2 {
 
 	private static Scheduler_Fields_V2__mdt schedulerFieldMapping;
+	private static Map<String, String> defaultRecordTypeMap {get {
+		{
+			if (defaultRecordTypeMap == null) {
+				defaultRecordTypeMap = new Map<String, String>();
+
+				for (Default_Record_Type__mdt defaultRecordType : [
+					SELECT Id, Object_API_Name__c, Record_Type_Developer_Name__c
+					FROM Default_Record_Type__mdt
+					WHERE Object_API_Name__c != null
+						AND Record_Type_Developer_Name__c != null
+				]) {
+					defaultRecordTypeMap.put(defaultRecordType.Object_API_Name__c, defaultRecordType.Record_Type_Developer_Name__c);
+				}
+			}
+			return defaultRecordTypeMap;
+		}
+	} set;}
 
 	@AuraEnabled(Cacheable=false)
 	public static SchedulerData getSchedulerData(String fieldMappingMetadataName, Datetime startDate, Datetime endDate, String eventCustomFilter, String resourceCustomFilter, String resourceOrderRule) {
@@ -784,9 +801,17 @@ public with sharing class SchedulerControllerV2 {
 
 			this.name = describeSObjectResult.name;
 			this.label = describeSObjectResult.label;
-			for (Schema.RecordTypeInfo recordTypeInfo : describeSObjectResult.recordTypeInfos) {
-				if (recordTypeInfo.isDefaultRecordTypeMapping()) {
+			if (defaultRecordTypeMap.containsKey(this.name)) {
+				Schema.RecordTypeInfo recordTypeInfo = describeSObjectResult.getRecordTypeInfosByDeveloperName().get(defaultRecordTypeMap.get(this.name));
+				if (recordTypeInfo != null) {
 					this.defaultRecordTypeId = recordTypeInfo.getRecordTypeId();
+				}
+			}
+			if (String.isBlank(this.defaultRecordTypeId)) {
+				for (Schema.RecordTypeInfo recordTypeInfo : describeSObjectResult.recordTypeInfos) {
+					if (recordTypeInfo.isDefaultRecordTypeMapping()) {
+						this.defaultRecordTypeId = recordTypeInfo.getRecordTypeId();
+					}
 				}
 			}
 		}
