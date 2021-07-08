@@ -29,6 +29,8 @@
             <property name="secondSchedulerFieldsMetadataName" type="String" label="Second Instance Field Metadata Name"/>
             
             <property name="eventCustomFilter" type="String" label="Event Custom Filter"/>
+	    
+            <property name="eventDefaultStyle" type="String" label="Event default style" datasource="Plain,Border,Colored,Hollow,Line,Dashed,Minimal,Rounded"/>
             
             <property name="secondEventCustomFilter" type="String" label="Second Instance Event Custom Filter"/>
             
