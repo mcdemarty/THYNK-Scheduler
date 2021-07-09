@@ -1024,14 +1024,14 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	}
 
 	setupFilterOptions() {
-		if (!this.hotelFilterOptions) {
+		// if (!this.hotelFilterOptions) {
 			this.hotelFilterOptions = this.mainSchedulerData.hotelFilterOptions;
 			this.hotelFilterOptions.unshift({label: '- Any Property -', value: null});
-		}
-		if (!this.myceQuoteFilterOptions) {
+		// }
+		// if (!this.myceQuoteFilterOptions) {
 			this.myceQuoteFilterOptions = this.mainSchedulerData.myceQuoteFilterOptions;
 			this.myceQuoteFilterOptions.unshift({label: '- Any Myce Quote -', value: null});
-		}
+		// }
 	}
 
 	handleChangeFilter(event) {
