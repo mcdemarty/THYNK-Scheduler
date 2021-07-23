@@ -663,9 +663,7 @@ public with sharing class SchedulerControllerV2 {
 
 			if (getSafeFieldValue(schedulerFields.Event_Style_API_Field__c, event) != null) {
 				eventStyle = String.valueOf(getSafeFieldValue(schedulerFields.Event_Style_API_Field__c, event)).toLowerCase();
-			}/* else {
-				eventStyle = 'plain';
-			}*/
+			}
 
 			eventRecord = event;
 		}

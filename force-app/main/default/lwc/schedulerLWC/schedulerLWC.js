@@ -205,6 +205,12 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 				if (this.template.querySelector('.scheduler-container')) {
 					this.template.querySelector('.scheduler-container').innerHTML = '';
 				}
+        
+				if (results && results.length) {
+					for (let res of results) {
+					  this.setPredefinedData(res.events);
+					}
+				}
 
 				this.mainSchedulerData = JSON.parse(JSON.stringify(results[0]));
 
@@ -850,7 +856,6 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 	createEventClickHandler() {
 		this.selectedEventId = null;
-		this.setPredefinedData();
 
 		this.template.querySelector('.scheduler-event-create-modal').showModal();
 	}
@@ -973,14 +978,19 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 	eventClickHandler(event) {
 		this.relatedComponent.selectedEventId = event.eventRecord.id;
-		this.relatedComponent.setPredefinedData();
 		this.relatedComponent.template.querySelector('.scheduler-event-create-modal').showModal();
 	}
 
-	setPredefinedData() {
-		if (this.eventDefaultStyle && this.mainSchedulerData && this.mainSchedulerData.eventStyleFieldName) {
-			if (!this.eventToHandle[this.mainSchedulerData.eventStyleFieldName]) {
-				this.eventToHandle[this.mainSchedulerData.eventStyleFieldName] = this.eventDefaultStyle;
+	setPredefinedData(events) {
+		if (events && events.length) {
+			for (let event of events) {
+				let style = 'plain';
+				if (event.eventStyle) {
+					style = event.eventStyle.toLowerCase();
+				} else if(this.eventDefaultStyle) {
+					style = this.eventDefaultStyle.toLowerCase();
+				}
+				event.eventStyle = style;
 			}
 		}
 	}
