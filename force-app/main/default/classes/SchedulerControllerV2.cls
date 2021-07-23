@@ -28,7 +28,6 @@ public with sharing class SchedulerControllerV2 {
 		schedulerData.eventParentResourceFieldAPIName = schedulerFields.Event_Parent_Resource_API_Field__c;
 		schedulerData.eventStartDateFieldAPIName = schedulerFields.Event_Start_Date_API_Field__c;
 		schedulerData.eventEndDateFieldAPIName = schedulerFields.Event_End_Date_API_Field__c;
-		schedulerData.eventStyleFieldName = schedulerFields.Event_Style_API_Field__c;
 
 		List<Id> resources = new List<Id>();
 
@@ -555,8 +554,6 @@ public with sharing class SchedulerControllerV2 {
 		public String eventStartDateFieldAPIName;
 		@AuraEnabled
 		public String eventEndDateFieldAPIName;
-		@AuraEnabled
-		public String eventStyleFieldName;
 		@AuraEnabled
 		public Map<String, String> eventTooltipFieldsNames = new Map<String, String>();
 		@AuraEnabled
