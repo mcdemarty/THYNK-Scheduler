@@ -791,13 +791,13 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		this.initScheduler();
 	}
 
-	startDateInputChangeHandler(event) {
-		if (!event.target.checkValidity()) {
+	startDateInputChangeHandler(event, isCustomRun) {
+		if (!isCustomRun && event && event.target && !event.target.checkValidity()) {
 			event.target.value = this.startDate;
 
 			return;
 		}
-
+		
 		this.customStartDate = new Date(event.target.value);
 
 		if (this.currentViewPreset !== this.VIEW_PRESET.CUSTOM) {
@@ -970,6 +970,17 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		}
 
 		this.relatedComponent.saveSchedulerState.call(this.relatedComponent);
+	}
+	
+	setToday() {
+		const tempDate = new Date();
+		const todayDate = new Date (tempDate.getUTCFullYear(), tempDate.getUTCMonth(), tempDate.getUTCDate());
+		
+		this.startDateInputChangeHandler({
+			target: {
+				value: todayDate
+			}
+    }, true);
 	}
 
 	eventClickHandler(event) {
