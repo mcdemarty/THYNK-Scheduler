@@ -1,6 +1,6 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { loadScript, loadStyle } from "lightning/platformResourceLoader";
-import TODAY_BUTTON_IMAGE from '@salesforce/resourceUrl/todayButtonImage';
+import TODAY_BUTTON_IMAGES from '@salesforce/resourceUrl/Today_Button_Images';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent'
 import { NavigationMixin } from 'lightning/navigation';
 import { subscribe, unsubscribe, APPLICATION_SCOPE, publish, MessageContext } from 'lightning/messageService';
@@ -45,7 +45,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	@api resourceHeadingFontColor;
 	@api resourceHeadingAlignment;
 	
-	@track todayImage = TODAY_BUTTON_IMAGE + '/today-button.png';
+	@track todayImage = TODAY_BUTTON_IMAGES + '/today-button-violet.png';
 
 	VIEW_PRESET = {
 		DAY: 1,
