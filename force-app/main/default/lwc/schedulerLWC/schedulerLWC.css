@@ -43,3 +43,8 @@
     height: 28px;
     border-radius: 0.25rem;
 }
+
+.today-button {
+    height: 2rem;
+    width: 2rem;
+}
