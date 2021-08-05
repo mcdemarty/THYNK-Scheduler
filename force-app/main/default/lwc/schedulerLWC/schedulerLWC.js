@@ -148,12 +148,10 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			}
 		)
 	}
-
-	// Init actions
-
-	initScheduler(preserveDates) {
+	
+	initSchedulerContainer(preserveDates) {
 		this.showSpinner = true;
-
+    
 		const schedulerPreset = this.getCurrentPreset();
 
 		if (preserveDates) {
@@ -176,7 +174,14 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		this.customEndDate = schedulerPreset.endDate;
 
 		this.saveSchedulerState();
+		return schedulerPreset;
+	}
 
+	// Init actions
+
+	initScheduler(preserveDates) {
+		let schedulerPreset = this.initSchedulerContainer(preserveDates);
+		
 		const getDataPromises = [
 			getSchedulerData({
 				fieldMappingMetadataName: this.schedulerFieldsMetadataName,
@@ -206,6 +211,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 				}
 
 				this.mainSchedulerData = JSON.parse(JSON.stringify(results[0]));
+				schedulerPreset = this.initSchedulerContainer(preserveDates);
 
 				for (let schedulerIndex = 0; schedulerIndex < results.length; schedulerIndex++) {
 					const result = results[schedulerIndex];
@@ -606,11 +612,11 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 				headers: [{
 					unit: 'd',
 					align: 'center',
-					dateFormat: 'DD MMMM'
+					dateFormat: this.dateDisplayFormat
 				}, {
 					unit: 'h',
 					align: 'center',
-					dateFormat: 'HH:mm'
+					dateFormat: this.timeDisplayFormat
 				}]
 			}
 		};
@@ -633,7 +639,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 				headers: [{
 					unit: 'd',
 					align: 'center',
-					dateFormat: 'DD MMMM'
+					dateFormat: this.dateDisplayFormat
 				}]
 			}
 		};
@@ -651,7 +657,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 				headers: [{
 					unit: 'd',
 					align: 'center',
-					dateFormat: 'DD MMMM'
+					dateFormat: this.dateDisplayFormat
 				}]
 			}
 		};
@@ -669,7 +675,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 				headers: [{
 					unit: 'd',
 					align: 'center',
-					dateFormat: 'DD MMMM'
+					dateFormat: this.dateDisplayFormat
 				}]
 			}
 		};
@@ -1021,6 +1027,14 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 			variant: 'error',
 			message: message
 		}));
+	}
+	
+	get dateDisplayFormat() {
+		return this.mainSchedulerData && this.mainSchedulerData.userLocaleDateFormat ? this.mainSchedulerData.userLocaleDateFormat : 'ddd MM/DD';
+	}
+	
+	get timeDisplayFormat() {
+		return this.mainSchedulerData && this.mainSchedulerData.userLocaleTimeFormat ? this.mainSchedulerData.userLocaleTimeFormat : 'HH:mm';
 	}
 
 	get viewPresetPicklistValue() {
