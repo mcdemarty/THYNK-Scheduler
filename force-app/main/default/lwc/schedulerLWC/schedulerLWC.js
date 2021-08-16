@@ -211,7 +211,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 				}
 
 				this.mainSchedulerData = JSON.parse(JSON.stringify(results[0]));
-				schedulerPreset = this.initSchedulerContainer(preserveDates);
+				// schedulerPreset = this.initSchedulerContainer(preserveDates);
 
 				for (let schedulerIndex = 0; schedulerIndex < results.length; schedulerIndex++) {
 					const result = results[schedulerIndex];
