@@ -632,8 +632,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 		const endDate = new Date(startDate);
 		endDate.setDate(startDate.getDate() + 7);
-		endDate.setMinutes(-1);
-
+		endDate.setMilliseconds(-1);
+		
 		return {
 			startDate: startDate,
 			endDate: endDate,
@@ -650,8 +650,11 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 	getCurrentMonthPreset() {
 		const startDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+		startDate.setHours(0, 0, 0);
+		
 		const endDate = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
-
+		endDate.setMilliseconds(-1);
+		
 		return {
 			startDate: startDate,
 			endDate: endDate,
@@ -816,9 +819,13 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		}
 
 		if (this.currentViewPreset === this.VIEW_PRESET.DAY) {
-			this.customEndDate.setHours(23, 59, 59);
+			this.customStartDate.setHours(this.hourPeriodStartHours[this.currentHourPeriod], 0, 0, 0);
+			this.customEndDate.setHours(this.hourPeriodStartHours[this.currentHourPeriod] + this.dayViewHourInterval, 0, 0, -1);
 		} else if (this.currentViewPreset === this.VIEW_PRESET.WEEK) {
-			this.customEndDate.setDate(this.customEndDate.getDate() + 7);
+			this.customEndDate = new Date(this.customStartDate);
+			this.customEndDate.setDate(this.customStartDate.getDate() + 7);
+			this.customEndDate.setHours(0, 0, 0);
+			this.customEndDate.setMilliseconds(-1);
 		} else if (this.currentViewPreset === this.VIEW_PRESET.MONTH) {
 			this.customEndDate.setMonth(this.customEndDate.getMonth() + 1);
 		}
@@ -845,10 +852,12 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		}
 
 		if (this.currentViewPreset === this.VIEW_PRESET.DAY) {
-			this.customStartDate.setHours(0, 0, 0);
-			this.customEndDate.setHours(23, 59, 59);
+			this.customStartDate.setHours(this.hourPeriodStartHours[this.currentHourPeriod], 0, 0, 0);
+			this.customEndDate.setHours(this.hourPeriodStartHours[this.currentHourPeriod] + this.dayViewHourInterval, 0, 0, -1);
 		} else if (this.currentViewPreset === this.VIEW_PRESET.WEEK) {
-			this.customStartDate.setDate(this.customStartDate.getDate() - 7);
+			this.customStartDate = new Date(this.customEndDate);
+			this.customStartDate.setDate(this.customEndDate.getDate() - 6);
+			this.customStartDate.setHours(0, 0, 0);
 		} else if (this.currentViewPreset === this.VIEW_PRESET.MONTH) {
 			this.customStartDate.setMonth(this.customStartDate.getMonth() - 1);
 		}
@@ -872,13 +881,24 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 		if (this.currentViewPreset === this.VIEW_PRESET.DAY) {
 			this.savedStartDate.setDate(this.savedStartDate.getDate() + 1);
-			this.savedEndDate.setDate(this.savedEndDate.getDate() + 1);
+			this.savedEndDate.setFullYear(this.savedStartDate.getFullYear(), this.savedStartDate.getMonth(), this.savedStartDate.getDate());
 		} else if (this.currentViewPreset === this.VIEW_PRESET.WEEK) {
 			this.savedStartDate.setDate(this.savedStartDate.getDate() + 7);
-			this.savedEndDate.setDate(this.savedEndDate.getDate() + 7);
+			this.savedStartDate.setHours(0, 0, 0);
+			let newDate = new Date(this.savedStartDate);
+			newDate.setDate(newDate.getDate() + 7);
+			this.savedEndDate = new Date(this.savedStartDate);
+			this.savedEndDate.setDate(this.savedStartDate.getDate() + 7);
+			this.savedEndDate.setHours(0, 0, 0);
+			this.savedEndDate.setMilliseconds(-1);
 		} else if (this.currentViewPreset === this.VIEW_PRESET.MONTH) {
 			this.savedStartDate.setMonth(this.savedStartDate.getMonth() + 1);
-			this.savedEndDate.setMonth(this.savedEndDate.getMonth() + 1);
+			this.savedStartDate.setHours(0, 0, 0);
+			this.savedEndDate = new Date(this.savedStartDate);
+			this.savedEndDate.setMonth(this.savedStartDate.getMonth() + 1);
+			this.savedEndDate.setDate(1);
+			this.savedEndDate.setHours(0, 0, 0);
+			this.savedEndDate.setMilliseconds(-1);
 		} else if (this.currentViewPreset === this.VIEW_PRESET.CUSTOM) {
 			const difference = Math.trunc((this.savedEndDate - this.savedStartDate) / 1000 / 60 / 60 / 24);
 
@@ -895,13 +915,22 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 		if (this.currentViewPreset === this.VIEW_PRESET.DAY) {
 			this.savedStartDate.setDate(this.savedStartDate.getDate() - 1);
-			this.savedEndDate.setDate(this.savedEndDate.getDate() - 1);
+			this.savedEndDate.setFullYear(this.savedStartDate.getFullYear(), this.savedStartDate.getMonth(), this.savedStartDate.getDate());
 		} else if (this.currentViewPreset === this.VIEW_PRESET.WEEK) {
 			this.savedStartDate.setDate(this.savedStartDate.getDate() - 7);
-			this.savedEndDate.setDate(this.savedEndDate.getDate() - 7);
+			this.savedStartDate.setHours(0, 0, 0);
+			this.savedEndDate = new Date(this.savedStartDate);
+			this.savedEndDate.setDate(this.savedStartDate.getDate() + 7);
+			this.savedEndDate.setHours(0, 0, 0);
+			this.savedEndDate.setMilliseconds(-1);
 		} else if (this.currentViewPreset === this.VIEW_PRESET.MONTH) {
 			this.savedStartDate.setMonth(this.savedStartDate.getMonth() - 1);
-			this.savedEndDate.setMonth(this.savedEndDate.getMonth() - 1);
+			this.savedStartDate.setHours(0, 0, 0);
+			this.savedEndDate = new Date(this.savedStartDate);
+			this.savedEndDate.setMonth(this.savedStartDate.getMonth() + 1);
+			this.savedEndDate.setDate(1);
+			this.savedEndDate.setHours(0, 0, 0);
+			this.savedEndDate.setMilliseconds(-1);
 		} else if (this.currentViewPreset === this.VIEW_PRESET.CUSTOM) {
 			const difference = Math.trunc((this.savedEndDate - this.savedStartDate) / 1000 / 60 / 60 / 24);
 
