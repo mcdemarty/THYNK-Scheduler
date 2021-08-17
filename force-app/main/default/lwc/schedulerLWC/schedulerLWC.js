@@ -68,7 +68,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 	savedResourceColumnsFilters;
 	resourceColumnsFiltersChanged = false;
-
+	resourceColumnsHidden = {};
+	
 	collapsedResources;
 
 	isManualCollapseExpand = false;
@@ -176,10 +177,19 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		this.saveSchedulerState();
 		return schedulerPreset;
 	}
-
+	
+	saveResourceColumns(index, fieldName, isHidden) {
+		if (!this.resourceColumnsHidden[index]) {
+			this.resourceColumnsHidden[index] = {};
+		}
+		this.resourceColumnsHidden[index][fieldName] = isHidden;
+		this.saveSchedulerState();
+	}
+	
 	// Init actions
 
 	initScheduler(preserveDates) {
+		const self = this;
 		let schedulerPreset = this.initSchedulerContainer(preserveDates);
 		
 		const getDataPromises = [
@@ -262,6 +272,11 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 						timeRange.style = 'background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2) 10px, rgba(190, 190, 190, 0.2) 10px, rgba(190, 190, 190, 0.2) 20px) rgba(255, 255, 255, 0); color: #888;';
 					});
 
+					if (this.resourceColumnsHidden && this.resourceColumnsHidden[schedulerIndex] && extensibleResult.resourceColumns && extensibleResult.resourceColumns.length) {
+					  extensibleResult.resourceColumns.forEach(column => {
+					    column.hidden = this.resourceColumnsHidden[schedulerIndex][column.field];
+					  });
+					}
 					const columns = extensibleResult.resourceColumns;
 					const columnsWidth = this.getSavedColumnsWidth(schedulerIndex);
 
@@ -372,6 +387,26 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 								}
 							},
 
+			headerMenu: {
+				items: {
+					hideColumn: {
+						onItem({column}) {
+							column.hide();
+							self.saveResourceColumns(schedulerIndex, column.field, column.hidden);
+						}
+					},
+					columnPicker: {
+						onToggle({item}) {
+							if (item.column.hidden) {
+								item.column.show();
+							} else {
+								item.column.hide();
+							}
+							self.saveResourceColumns(schedulerIndex, item.column.field, item.column.hidden);
+						}
+					}
+				}
+			},
 							eventMenu: {
 								items: {
 									deleteEvent: false,
@@ -498,7 +533,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		state.startDate = new Date(this.customStartDate).toISOString();
 		state.endDate = new Date(this.customEndDate).toISOString();
 		state.resourceColumnsFilters = this.savedResourceColumnsFilters || [];
-
+		state.resourceColumnsHidden = this.resourceColumnsHidden || {};
 		window.localStorage.setItem(window.location + '-SC', JSON.stringify(state));
 	}
 
@@ -511,7 +546,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		this.collapsedResources = state.collapsedResources;
 		this.currentViewPreset = state.preset;
 		this.savedResourceColumnsFilters = state.resourceColumnsFilters;
-
+		this.resourceColumnsHidden = state.resourceColumnsHidden || {};
 		if (state.startDate && state.endDate) {
 			this.savedStartDate = new Date(state.startDate);
 			this.savedEndDate = new Date(state.endDate);
