@@ -78,7 +78,9 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	selectedEventId;
 
 	errorMessage;
-
+	
+	dateFormat;
+	
 	connectedCallback() {
 		this.showSpinner = true;
 
@@ -499,6 +501,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		state.endDate = new Date(this.customEndDate).toISOString();
 		state.resourceColumnsFilters = this.savedResourceColumnsFilters || [];
 
+		state.dateFormat = this.dateDisplayFormat;
 		window.localStorage.setItem(window.location + '-SC', JSON.stringify(state));
 	}
 
@@ -512,6 +515,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		this.currentViewPreset = state.preset;
 		this.savedResourceColumnsFilters = state.resourceColumnsFilters;
 
+		this.dateFormat = state.dateFormat;
 		if (state.startDate && state.endDate) {
 			this.savedStartDate = new Date(state.startDate);
 			this.savedEndDate = new Date(state.endDate);
@@ -1030,7 +1034,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	}
 	
 	get dateDisplayFormat() {
-		return this.mainSchedulerData && this.mainSchedulerData.userLocaleDateFormat ? this.mainSchedulerData.userLocaleDateFormat : 'ddd MM/DD';
+		return this.mainSchedulerData && this.mainSchedulerData.userLocaleDateFormat ? this.mainSchedulerData.userLocaleDateFormat : this.dateFormat ? this.dateFormat : 'ddd MM/DD';
 	}
 	
 	get timeDisplayFormat() {
