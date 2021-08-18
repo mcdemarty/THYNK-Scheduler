@@ -709,7 +709,7 @@ public with sharing class SchedulerControllerV2 {
 			'en_IE_EURO'    => 'DD/MM',
 			'en_NZ'         => 'd/MM',
 			'en_SG'         => 'M/d',
-			'en_US'         => 'M/d',
+			'en_US'         => 'ddd MM/DD',
 			'en_ZA'         => 'MM/DD',
 			'es'            => 'd/MM',
 			'es_AR'         => 'DD/MM',
