@@ -17,19 +17,19 @@
 					<div onclick={moveToPreviousPeriodClickHandler}>
 						<lightning-icon icon-name="utility:chevronleft" size="small" class="period-controller-button slds-m-right--xx-small"></lightning-icon>
 					</div>
-					<div if:true={todayImage} class="slds-m-right_small">
-						<div style="height: 1.5rem;"></div>
-						<button class="slds-button today-button" onclick={setToday}>
-							<img src={todayImage}>
-						</button>
-					</div>
 					<lightning-input type="date" label="Start Date" value={startDate} onchange={startDateInputChangeHandler}></lightning-input>
 					<div class="slds-p-horizontal_small time-range-header-separator"> - </div>
 					<lightning-input type="date" label="End Date" value={endDate} onchange={endDateInputChangeHandler}></lightning-input>
 					<div onclick={moveToNextPeriodClickHandler}>
 						<lightning-icon icon-name="utility:chevronright" size="small" class="period-controller-button slds-m-left_small"></lightning-icon>
 					</div>
-					<lightning-combobox label="View Preset" options={viewPresetPicklistOptions} class="slds-m-left_large" value={viewPresetPicklistValue} onchange={viewPresetPicklistChangeHandler}></lightning-combobox>
+					<div if:true={todayImage} class="slds-m-left_small slds-m-right_small">
+						<div style="height: 1.5rem;"></div>
+						<button class="slds-button today-button" onclick={setToday}>
+							<img src={todayImage}>
+						</button>
+					</div>
+					<lightning-combobox label="View Preset" options={viewPresetPicklistOptions} class="" value={viewPresetPicklistValue} onchange={viewPresetPicklistChangeHandler}></lightning-combobox>
 				</div>
 			</div>
 		</div>
