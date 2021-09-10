@@ -220,7 +220,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 					const resourceStore = new bryntum.schedulerpro.ResourceStore({
 						tree: true,
-						data: this.collapseResourcesFromState(this.mergeResourceRecords(extensibleResult.resources), schedulerIndex)
+						data: this.collapseResourcesFromState(this.mergeResourceRecords(extensibleResult.resources, extensibleResult.resourceColumns), schedulerIndex)
 					});
 
 					const dependenciesData = [];
@@ -267,9 +267,10 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 						columns[i].region = this.columnsOnRight ? 'right' : 'left';
 						columns[i].autoHeight = this.columnsAutoHeight;
 					}
-
-					for (let i = 0; i < columnsWidth.length; i++) {
-						columns[i].width = columnsWidth[i];
+					if (columns.length == columnsWidth.length) {
+						for (let i = 0; i < columnsWidth.length; i++) {
+						  columns[i].width = columnsWidth[i];
+						}
 					}
 
 					extensibleResult.resourceColumns[0].type = 'tree';
@@ -704,8 +705,16 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 		removeFromNode(tree);
 	}
-
-	mergeResourceRecords(resources) {
+	
+	mergeResourceRecords(resources, resourceColumns) {
+		const fieldNames = new Set();
+		if (resourceColumns && resourceColumns.length) {
+			for (let column of resourceColumns) {
+				if (column.field && column.field.indexOf('.') == -1) {
+					fieldNames.add(column.field);
+				}
+			}
+		}
 		const executeMergeIteration = (resources) => {
 			const result = [];
 
@@ -716,7 +725,16 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 
 				let newResource = Object.assign(resource, resource.resourceRecord);
 				delete newResource.resourceRecord;
-
+				
+				if (fieldNames && fieldNames.size) {
+					const keys = Object.keys(newResource);
+					for (let field of fieldNames) {
+						if (!keys.includes(field)) {
+							newResource[field] = '';
+						}
+					}
+				}
+				
 				if (newResource.children) {
 					newResource.children = executeMergeIteration(newResource.children);
 				}
