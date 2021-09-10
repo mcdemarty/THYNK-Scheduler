@@ -1004,8 +1004,8 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		}
 
 		const fieldMappingMetadataName = this.schedulerIndex === 0 ? this.relatedComponent.schedulerFieldsMetadataName : this.relatedComponent.secondSchedulerFieldsMetadataName;
-
-		if (this.relatedComponent.useOverbookingFlow) {
+		
+		if (this.relatedComponent.isValueTrue(this.relatedComponent.useOverbookingFlow)) {
 			publish(this.relatedComponent.messageContext, schedulerEventChanged, {
 				eventId: changedRecord.id,
 				resourceId: changedRecord.resourceId,
@@ -1042,9 +1042,13 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 		this.relatedComponent.collapsedResources[this.schedulerIndex] = this.relatedComponent.collapsedResources[this.schedulerIndex] || [];
 
 		if (event.type === 'collapsenode') {
-			this.relatedComponent.collapsedResources[this.schedulerIndex].push(event.record.id);
+			const resourceSet = new Set(this.relatedComponent.collapsedResources[this.schedulerIndex]);
+			resourceSet.add(event.record.id);
+			this.relatedComponent.collapsedResources[this.schedulerIndex] = [...resourceSet];
 		} else if (event.type === 'expandnode') {
-			this.relatedComponent.collapsedResources[this.schedulerIndex].splice(this.relatedComponent.collapsedResources.indexOf(event.record.id), 1);
+			const resourceSet = new Set(this.relatedComponent.collapsedResources[this.schedulerIndex]);
+			resourceSet.delete(event.record.id);
+			this.relatedComponent.collapsedResources[this.schedulerIndex] = [...resourceSet];
 		}
 
 		this.relatedComponent.saveSchedulerState.call(this.relatedComponent);
