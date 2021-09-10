@@ -1034,7 +1034,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	}
 	
 	get dateDisplayFormat() {
-		return this.mainSchedulerData && this.mainSchedulerData.userLocaleDateFormat ? this.mainSchedulerData.userLocaleDateFormat : this.dateFormat ? this.dateFormat : 'ddd MM/DD';
+		return this.mainSchedulerData && this.mainSchedulerData.userLocaleDateFormat ? this.mainSchedulerData.userLocaleDateFormat : this.dateFormat ? this.dateFormat : 'ddd DD/MM';
 	}
 	
 	get timeDisplayFormat() {
