@@ -22,6 +22,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	@api secondResourceCustomFilter;
 	@api resourceOrderRule;
 	@api componentHeight;
+	@api rowHeight;
 	@api eventMargin;
 	@api eventLayoutType;
 	@api enableColumnFiltering;
@@ -312,6 +313,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 						appendTo: this.template.querySelector('.scheduler-container'),
 
 						minHeight: this.componentHeight,
+            rowHeight: this.rowHeight ? parseFloat(this.rowHeight) : null,
 
 						enableEventAnimations: false,
 						createEventOnDblClick: false,
