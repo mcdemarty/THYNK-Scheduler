@@ -788,7 +788,34 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 	viewPresetPicklistChangeHandler(event) {
 		this.currentViewPreset = parseInt(event.target.value);
 
-		this.initScheduler();
+		let newStartDate = this.customStartDate;
+		if (this.currentViewPreset === this.VIEW_PRESET.DAY) {
+			newStartDate = this.customStartDate;
+		} else if (this.currentViewPreset === this.VIEW_PRESET.WEEK) {
+			newStartDate = this.getMonday(this.customStartDate);
+		} else if (this.currentViewPreset === this.VIEW_PRESET.MONTH) {
+			newStartDate = this.getMonthFirstDay(this.customStartDate);
+		}
+		this.startDateInputChangeHandler({
+				target: {
+					value: newStartDate
+				}
+			},
+			true
+		);
+	}
+	
+	getMonday(d) {
+		const day = d.getDay();
+		const	diff = d.getDate() - day + (day == 0 ? -6:1);
+		return new Date(d.setDate(diff));
+	}
+	
+	getMonthFirstDay(d) {
+		const y = d.getFullYear();
+		const m = d.getMonth();
+		var firstDay = new Date(y, m, 1);
+		return firstDay;
 	}
 
 	startDateInputChangeHandler(event, isCustomRun) {
