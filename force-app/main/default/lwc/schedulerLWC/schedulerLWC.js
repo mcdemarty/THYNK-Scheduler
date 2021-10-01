@@ -313,7 +313,7 @@ export default class SchedulerLwc extends NavigationMixin(LightningElement) {
 						appendTo: this.template.querySelector('.scheduler-container'),
 
 						minHeight: this.componentHeight,
-            rowHeight: this.rowHeight ? parseFloat(this.rowHeight) : null,
+						rowHeight: this.rowHeight ? parseFloat(this.rowHeight) : null,
 
 						enableEventAnimations: false,
 						createEventOnDblClick: false,

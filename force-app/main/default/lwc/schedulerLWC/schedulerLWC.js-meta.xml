@@ -73,7 +73,9 @@
             <property name="resourceHeadingFontColor" type="String" label="Resource Heading Font Color" default="black"/>
             
             <property name="resourceHeadingAlignment" type="String" label="Resource Heading Alignment" datasource="Left,Center,Right"/>
-            
+
+            <property name="rowHeight" type="Integer" label="Row Height" default="40"/>
+
         </targetConfig>
         
     </targetConfigs>
